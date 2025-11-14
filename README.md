@@ -1,7 +1,8 @@
+```
 # Comandos Importantes de GlazeWM [Con Powertoys 100% HYPRLAND]			
-```------------------------------------------------------	----------------------------```
+------------------------------------------------------	----------------------------
 	\_;-> (Solo debes de mapear con Windows, cada atajo de Alt en Power)
-```------------------------------------------------------	----------------------------```
+------------------------------------------------------	----------------------------
 🎯 MOVIMIENTO Y FOCO
 Alt + H/J/K/L o Alt + Flechas - Mover foco entre ventanas
 			\_;-> O USA LAS  FLECHAS; < ↓ ↑ >
@@ -13,10 +14,10 @@ Alt + Control  + H/J/K/L - Mover ventana a otra posición
 Alt + 1-9 - Cambiar a workspace 1-9
 
 Alt + Shift + 1-9 - Mover ventana a workspace 1-9
-```
-```------------------------------------------------------	----------------------------```
+
+------------------------------------------------------	----------------------------
 ##🪟 ESTADOS DE VENTANA
-```
+
 ALT + Space - Windows Start [Rofi like frfr]
 
 Alt + T - Forzar modo tiling ✅ Salir del float
@@ -27,16 +28,15 @@ Alt + F11 - Pantalla completa -> [Windows + TAB]
 ALT + F -  ✅ FLOATING MODE GODDD
 
 Alt + M - Minimizar
-```
 
-```------------------------------------------------------	----------------------------```	
+------------------------------------------------------	----------------------------
 🔄 LAYOUT Y DIRECCIÓN
 Alt + V - Cambiar dirección de tiling (horizontal/vertical)
 
 Alt + R → Modo resize → Usar HJKL para redimensionar → ESC para salir
-```------------------------------------------------------	----------------------------	```
+------------------------------------------------------	----------------------------
 ##⚙️ SISTEMA
-```
+
 Alt + Shift + E - Recargar configuración
 
 Alt + Shift + W - Redibujar ventanas
