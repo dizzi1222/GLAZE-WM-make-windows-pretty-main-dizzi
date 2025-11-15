@@ -1,5 +1,6 @@
-```
 # Comandos Importantes de GlazeWM [Con Powertoys 100% HYPRLAND]			
+
+```
 ------------------------------------------------------	----------------------------
 	\_;-> (Solo debes de mapear con Windows, cada atajo de Alt en Power)
 ------------------------------------------------------	----------------------------
