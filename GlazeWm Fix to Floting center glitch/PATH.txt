@@ -1,0 +1,3 @@
+	copy and replace to:
+
+C:\Program Files\glzr.io\GlazeWM
