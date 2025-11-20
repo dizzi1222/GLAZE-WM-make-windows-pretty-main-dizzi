@@ -281,6 +281,7 @@ keybindings:
     # Redraw all windows.
 
   - commands: ["shell-exec wt"]
+    # - commands: ["shell-exec wsl"]
     bindings: ["alt+enter"]
     # Launch CMD terminal. Alternatively, use `shell-exec wezterm-gui` or
 
