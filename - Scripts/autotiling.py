@@ -175,18 +175,49 @@ async def main():
         return
 
     try:
-        # Esperar estabilización
-        print("⏳ Esperando 3 segundos...")
-        await asyncio.sleep(3)
+        # Esperar 1 segundo después de conectar
+        print("⏳ Esperando 1 segundo...")
+        await asyncio.sleep(1)
         
-        # Configuración inicial mínima
-        print("🎯 Configuración inicial...")
-        
-        # --- AGREGAR ESTAS LÍNEAS PARA MOVER TERMINAL ---
+        # Mover terminal al workspace 9 y enfocarlo
         print("📦 Moviendo terminal al workspace 9...")
         await send_glazewm_command("move", "--workspace", "9")
-        await asyncio.sleep(0.5)
+        await send_glazewm_command("focus", "--workspace", "9")
+        
+        # Esperar otro segundo
+        print("⏳ Esperando 1 segundo más...")
+        await asyncio.sleep(1)
+        
+        # Enfocar workspace 1
+        print("🎯 Enfocando workspace 1...")
         await send_glazewm_command("focus", "--workspace", "1")
+        
+        # Mover terminal al workspace 9 y enfocarlo
+        print("📦 Moviendo terminal al workspace 9...")
+        await send_glazewm_command("move", "--workspace", "9")
+        await send_glazewm_command("focus", "--workspace", "9")
+        
+        # Enfocar workspace 1
+        print("🎯 Enfocando workspace 1...")
+        await send_glazewm_command("focus", "--workspace", "1")
+
+        # Mover terminal al workspace 9 y enfocarlo
+        print("📦 Moviendo terminal al workspace 9...")
+        await send_glazewm_command("move", "--workspace", "9")
+        await send_glazewm_command("focus", "--workspace", "9")
+        
+        # Enfocar workspace 1
+        print("🎯 Enfocando workspace 1...")
+        await send_glazewm_command("focus", "--workspace", "1")
+
+        # Recargar GlazeWM y yasbc config # PARA DESAPARECER LOS ICONOS de cierto tema [Aquamarine]
+        import subprocess
+
+        # En lugar de: yasbc reload
+        subprocess.run(["yasbc", "reload"], capture_output=True, text=True)
+        print("✅ YASB recargado")
+
+        print("✅ Secuencia de inicio completada!")
         # ------------------------------------------------
         
         # Forzar dirección vertical inicial
