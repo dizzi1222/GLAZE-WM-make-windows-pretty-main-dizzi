@@ -54,8 +54,8 @@ function Stop-EdgeProcesses {
     $edgeProcessNames = @(
         "msedge",
         "MicrosoftEdge",
-        "edgewebview",
-        "msedgewebview2",
+        # "edgewebview",
+        # "msedgewebview2",
         "MicrosoftEdgeUpdate",
         "edge"
     )
