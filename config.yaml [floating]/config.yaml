@@ -1,9 +1,9 @@
-# ████████╗██╗██╗░░░░░██╗███╗░░██╗░██████╗░
-# ╚══██╔══╝██║██║░░░░░██║████╗░██║██╔════╝░
-# ░░░██║░░░██║██║░░░░░██║██╔██╗██║██║░░██╗░
-# ░░░██║░░░██║██║░░░░░██║██║╚████║██║░░╚██╗
-# ░░░██║░░░██║███████╗██║██║░╚███║╚██████╔╝
-# ░░░╚═╝░░░╚═╝╚══════╝╚═╝╚═╝░░╚══╝░╚═════╝░
+# ███████╗██╗░░░░░░█████╗░░█████╗░████████╗
+# ██╔════╝██║░░░░░██╔══██╗██╔══██╗╚══██╔══╝
+# █████╗░░██║░░░░░██║░░██║███████║░░░██║░░░
+# ██╔══╝░░██║░░░░░██║░░██║██╔══██║░░░██║░░░
+# ██║░░░░░███████╗╚█████╔╝██║░░██║░░░██║░░░
+# ╚═╝░░░░░╚══════╝░╚════╝░╚═╝░░╚═╝░░░╚═╝░░░
 # SI SE BUGEA LA VENTANA EN FULLSCREEN (al usar Alt+F):
 # ----------------- ACTIVAR VANILLA Windows -------------------
 
@@ -81,14 +81,14 @@ general:
 #     left: "0px"
 
 gaps:
-  # Gap between adjacent windows.
-  inner_gap: "10px"
-  # Gap between windows and the screen edge.
-  outer_gap:
-    top: "40px"
-    right: "10px"
-    bottom: "10px"
-    left: "10px"
+# Gap between adjacent windows.
+inner_gap: "10px"
+# Gap between windows and the screen edge.
+outer_gap:
+top: "10px"
+right: "10px"
+bottom: "10px"
+left: "10px"
 
 # ========================================
 # WORKSPACES
@@ -199,7 +199,7 @@ window_effects:
       # color: "#d3d3d3"
 
 window_behavior:
-  initial_state: "tiling" # ← Mejor para un window manager
+  initial_state: "floating" # ← Mejor para un window manager
   state_defaults:
     floating:
       centered: false # ← ✅ EVITA EL CENTRADO AUTOMÁTICO

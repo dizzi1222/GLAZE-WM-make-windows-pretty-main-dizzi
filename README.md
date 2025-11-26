@@ -75,3 +75,55 @@ https://github.com/user-attachments/assets/96f8b2d1-122b-4795-8c52-5ea184f916bd
       
          ╰─❯ ![Video in higher quality!] 󱞡↓
 https://streamable.com/gzwuz6
+
+DIZZI README ~ Best WINDOWS Tile Manager
+------------------------------------------------------
+
+~[ YO MODIFIQUE; config [glazeWM]
+		 \_;-> LA CONFIG DE ZEBAR Y LA HICE MIA (fokiu vimichael)
+
+~[ YASB ESTA CON otra CONFIG DE GLAZEWM (de SleepyCatHey)
+
+# ....Al tonto se le olvido explicar:
+# Al editar el config.yaml hay comandos:
+# ✅ COMANDOS CORRECTOS:
+commands: ["ignore"]                    # Ignorar ventana
+commands: ["set-floating"]              # Hacer flotante
+commands: ["set-floating --centered"]   # Flotante centrada
+commands: ["set-tiling"]                # Hacer tiling
+commands: ["set-always-on-top"]         # Siempre encima (SOLO Windows 11)
+
+Con eso defines los windows similar a windowsrules en hypr.
+------------------------------------------------------
+C:\Users\Diego\.glzr\glazewm
+
+En esa ruta debes de pegar
+
+zebar-config config
+
+ ~ Ignora .weztern.lua, private-build-plans.toml
+	~ IGNORA vanilla-clear [hay temas mejores y funcionales].
+
+██╗███╗░░██╗░██████╗████████╗░█████╗░██╗░░░░░░█████╗░██████╗░
+██║████╗░██║██╔════╝╚══██╔══╝██╔══██╗██║░░░░░██╔══██╗██╔══██╗
+██║██╔██╗██║╚█████╗░░░░██║░░░███████║██║░░░░░███████║██████╔╝
+██║██║╚████║░╚═══██╗░░░██║░░░██╔══██║██║░░░░░██╔══██║██╔══██╗
+██║██║░╚███║██████╔╝░░░██║░░░██║░░██║███████╗██║░░██║██║░░██║
+╚═╝╚═╝░░╚══╝╚═════╝░░░░╚═╝░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═╝░░╚═╝
+
+------------------------------------------------------
+1 ~[- Instalar YASB waybar] ~ (Mejores temas, interactivad)
+		\_;-> winget install --id AmN.yasb
+
+----......
+2 ~[- Instalar ZEBAR topbar] ~ (Overline-zebar incluye AUTO TILING
+					 y permite scripts .vbs.. but meh)
+					 
+		\_;-> https://github.com/glzr-io/zebar/releases
+
+......----
+3 ~[- Instalar glazeWM]
+		\_;-> winget install GlazeWM
+		
+PD: Error de principiante, era mejor consultar la documentacion en: 
+https://github.com/glzr-io/glazewm/blob/main/README.md
