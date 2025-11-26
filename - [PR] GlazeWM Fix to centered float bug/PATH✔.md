@@ -40,8 +40,10 @@ Copia el atajo GlazeWM en la carpeta Inicio- StartUp
 		2- Click izquierdo en el escritorio > Crear acceso directo > inserta:
 		
 		powershell.exe -Window
-		 Style Hidden -ExecutionPolicy Bypass -File "C:\Users\Diego\Documents\Scripts\autostart-glaze-admin.ps1"
+		 Style Hidden "C:\Users\Diego\Documents\Scripts\autostart-glaze-admin.ps1"
 
+
+#-ExecutionPolicy Bypass -File  sobra antes del "C:\Users\...
 
 
 # ------------------------------------

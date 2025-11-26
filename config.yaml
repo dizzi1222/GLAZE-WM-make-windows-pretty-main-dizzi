@@ -214,7 +214,7 @@ window_behavior:
   state_defaults:
     floating:
       centered: false # ← ✅ EVITA EL CENTRADO AUTOMÁTICO
-      shown_on_top: false
+      shown_on_top: true # Solo en Tiling mode
     fullscreen:
       maximized: false
       shown_on_top: false
