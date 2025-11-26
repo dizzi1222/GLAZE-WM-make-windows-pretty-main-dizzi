@@ -105,7 +105,9 @@ workspaces:
   - name: "7"
   - name: "8"
   - name: "9"
-  - name: "1"
+    display_name: "Music🎻"
+
+  - name: "1" # Al arrancar inicia en el 1
     # Optional override for the workspace label used in 3rd-party apps.
     # Does not need to be unique.
     display_name: "2B^ Kaine🖤"
@@ -132,6 +134,35 @@ window_rules:
       - window_process: { equals: "Calculator" }
       - window_process: { equals: "NVIDIA" }
 
+  # ---------------- mover workspaces ----------------------
+  # BROWSERS
+  - commands: ["move --workspace 2"]
+    match:
+      # Move browsers to workspace 1.
+      - window_process: { regex: "msedge|brave|chrome|firefox" }
+
+  # MUSIC
+  - commands: ["move --workspace 9"]
+    match:
+      # Move browsers to workspace 1.
+      - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
+      # kew terminal god
+
+  # ---------------- ignorar ----------------------
+  - commands: ["ignore"]
+    match:
+      # Ignores any Zebar windows.
+      - window_process: { equals: "zebar" }
+
+      # Ignores picture-in-picture windows for browsers.
+      # Note that *both* the title and class must match for the rule to run.
+      - window_title: { regex: "[Pp]icture.in.[Pp]icture" }
+        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass" }
+      - window_process: { equals: "PowerToys.PowerAccent" }
+        # Ignore rules for various 3rd-party apps.
+      - window_process: { equals: "Lively" }
+        window_class: { regex: "HwndWrapper*" }
+
       # ✅ AGREGAR ESTAS REGLAS para diálogos flotantes
       # SOLO las más esenciales
       # 3. Diálogos de búsqueda/reemplazo (más específico)
@@ -149,29 +180,9 @@ window_rules:
           { regex: "^Sign in$|^Log in$|^Iniciar sesión$|^Authentication$" }
         window_class: { regex: ".*" }
 
-      - window_class: { equals: "#32770" } # Diálogos nativos
+      - window_class: { equals: "#32770" } # Diálogos nativos [engloba el 90% de windows]
       # Notificaciones
       - window_title: { regex: "Notification|Alert" }
-
-  - commands: ["move --workspace 1"]
-    match:
-      # Move browsers to workspace 1.
-      - window_process: { regex: "msedge|brave|chrome|firefox" }
-
-  # ---------------- ignorar ----------------------
-  - commands: ["ignore"]
-    match:
-      # Ignores any Zebar windows.
-      - window_process: { equals: "zebar" }
-
-      # Ignores picture-in-picture windows for browsers.
-      # Note that *both* the title and class must match for the rule to run.
-      - window_title: { regex: "[Pp]icture.in.[Pp]icture" }
-        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass" }
-      - window_process: { equals: "PowerToys.PowerAccent" }
-        # Ignore rules for various 3rd-party apps.
-      - window_process: { equals: "Lively" }
-        window_class: { regex: "HwndWrapper*" }
 
   # ---------------- tiling ----------------------
   # - commands: ["set-tiling"]
@@ -226,28 +237,30 @@ binding_modes:
         bindings: ["j", "down"]
       - commands: ["wm-disable-binding-mode --name resize"]
         # Press enter/escape to return to default keybindings.
-
         bindings: ["escape", "enter"]
   - name: "pause"
     # When enabled, all keybindings are disabled except for alt+shift+p which
 
-    # returns to default keybindings.
-    keybindings:
-      - commands: ["wm-disable-binding-mode --name pause"]
-        bindings: ["alt+shift+p"]
+  # ---------------- Atajos ----------------------
 keybindings:
+  # returns to default keybindings.
+  - commands: ["wm-disable-binding-mode --name pause"]
+    bindings: ["alt+shift+p"]
+
   # Shift focus in a given direction.
   - commands: ["focus --direction left"]
     bindings: ["alt+h", "alt+left"]
   - commands: ["focus --direction right"]
     bindings: ["alt+l", "alt+right"]
   - commands: ["focus --direction up"]
-    bindings: ["alt+k", "alt+up"]
+    # bindings: ["alt+k", "alt+up"]
+    bindings: ["alt+k"]
   - commands: ["focus --direction down"]
-    bindings: ["alt+j", "alt+down"]
-  - commands: ["move --direction left"]
-    # Move focused window in a given direction.
+    # bindings: ["alt+j", "alt+down"]
+    bindings: ["alt+j"]
 
+    # Move focused window in a given direction.
+  - commands: ["move --direction left"]
     bindings: ["alt+shift+h", "alt+shift+left"]
   - commands: ["move --direction right"]
     bindings: ["alt+shift+l", "alt+shift+right"]
@@ -255,8 +268,8 @@ keybindings:
     bindings: ["alt+shift+k", "alt+shift+up"]
   - commands: ["move --direction down"]
     bindings: ["alt+shift+j", "alt+shift+down"]
-    # Resize focused window by a percentage or pixel amount.
 
+    # Resize focused window by a percentage or pixel amount.
   - commands: ["resize --width -2%"]
     bindings: ["alt+ctrl+h", "alt+ctrl+left"]
   - commands: ["resize --width +2%"]
@@ -340,9 +353,9 @@ keybindings:
   # Focus the workspace that last had focus.
 
   # bindings: ["alt+d"]
-  - commands: ["focus --workspace 1"]
-    # Change focus to a workspace defined in `workspaces` config.
+  # Change focus to a workspace defined in `workspaces` config.
 
+  - commands: ["focus --workspace 1"]
     bindings: ["alt+1"]
   - commands: ["focus --workspace 2"]
     bindings: ["alt+2"]
@@ -360,10 +373,11 @@ keybindings:
     bindings: ["alt+8"]
   - commands: ["focus --workspace 9"]
     bindings: ["alt+9"]
-  - commands: ["move-workspace --direction left"]
     # Move the focused window's parent workspace to a monitor in a given
 
     # direction.
+    # no lo entiendo xd
+  - commands: ["move-workspace --direction left"]
     bindings: ["alt+shift+a"]
   - commands: ["move-workspace --direction right"]
     bindings: ["alt+shift+f"]

@@ -27,28 +27,20 @@ cargo build && cargo run
 # ------------------------------------
 3- GLAZE WM CON PRIVILEGIOS [Sin Acceso Directo, sin Inicio, sin Start]:
 
-~ Manualmente [Windows + R > pwsh]
-Start-Process "glazewm.exe" -Verb RunAs   
+#~ Manualmente [Windows + R > pwsh]
+	Start-Process "glazewm.exe" -Verb RunAs   
 
-~ Pero si prefieres automatizar...
+#~ Pero si prefieres automatizar...
+Copia el atajo GlazeWM en la carpeta Inicio- StartUp
+(ubicado en ..\-[~Inicio~] )
 
-# Ejecuta el script:
-```
-# autostart-glaze-admin
-# SOLO EJECUTAR 1 VEZ.
-# 1. Primero eliminar el acceso directo actual del Startup
-Remove-Item "C:\Users\Diego\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\glazewm.exe.lnk" -ErrorAction SilentlyContinue
-
-# 2. Crear la tarea programada
-$action = New-ScheduledTaskAction -Execute "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
-$trigger = New-ScheduledTaskTrigger -AtLogon
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
-
-Register-ScheduledTask -TaskName "GlazeWM" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
-
-# 3. Verificar
-Get-ScheduledTask -TaskName "GlazeWM"
+	#~ El proceso para crear esto fue:
+		1- Copia autostart-glaze-admin.ps1 a Documentos\Scripts
+		
+		2- Click izquierdo en el escritorio > Crear acceso directo > inserta:
+		
+		powershell.exe -Window
+		 Style Hidden -ExecutionPolicy Bypass -File "C:\Users\Diego\Documents\Scripts\autostart-glaze-admin.ps1"
 
 
 
