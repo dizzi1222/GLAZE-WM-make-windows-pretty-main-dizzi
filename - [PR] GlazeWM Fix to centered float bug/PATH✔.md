@@ -35,15 +35,18 @@ Copia el atajo GlazeWM en la carpeta Inicio- StartUp
 (ubicado en ..\-[~Inicio~] )
 
 	#~ El proceso para crear esto fue:
-		1- Copia autostart-glaze-admin.ps1 a Documentos\Scripts
+		1- Copia autostart-glaze-admin.vbs a Documentos\Scripts
 		
 		2- Click izquierdo en el escritorio > Crear acceso directo > inserta:
+		C:\Windows\System32\wscript.exe "C:\Users\Diego\Documents\Scripts\autostart-glaze-admin.vbs"
+		# El icono lo cambie manualmente al path de glazeWM
 		
+		# OTRAS ALTERNATIVAS
 		powershell.exe -Window
 		 Style Hidden "C:\Users\Diego\Documents\Scripts\autostart-glaze-admin.ps1"
 
 
-#-ExecutionPolicy Bypass -File  sobra antes del "C:\Users\...
+			#-ExecutionPolicy Bypass -File  sobra antes del "C:\Users\...
 
 
 # ------------------------------------
