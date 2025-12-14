@@ -158,7 +158,7 @@ window_rules:
       # Ignores picture-in-picture windows for browsers.
       # Note that *both* the title and class must match for the rule to run.
       - window_title: { regex: "[Pp]icture.in.[Pp]icture" }
-        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass" }
+        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass|brave" }
         # Ignore rules for various 3rd-party apps.
       - window_process: { equals: "Lively" }
         window_class: { regex: "HwndWrapper*" }

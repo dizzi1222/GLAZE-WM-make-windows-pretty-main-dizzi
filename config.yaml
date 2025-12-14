@@ -143,10 +143,10 @@ window_rules:
       - window_process: { regex: "msedge|brave|chrome|firefox" }
 
   # MUSIC
-  - commands: ["move --workspace 2"]
-    match:
+  # - commands: ["move --workspace 2"]
+    # match:
       # Move browsers to workspace 1.
-      - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
+      # - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
       # kew terminal god
 
   # ---------------- ignorar ----------------------
@@ -158,7 +158,7 @@ window_rules:
       # Ignores picture-in-picture windows for browsers.
       # Note that *both* the title and class must match for the rule to run.
       - window_title: { regex: "[Pp]icture.in.[Pp]icture" }
-        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass" }
+        window_class: { regex: "Chrome_WidgetWin_1|MozillaDialogClass|brave" }
         # Ignore rules for various 3rd-party apps.
       - window_process: { equals: "Lively" }
         window_class: { regex: "HwndWrapper*" }
@@ -336,9 +336,9 @@ keybindings:
     bindings: ["alt+shift+w"]
     # Redraw all windows.
 
-  - commands: ["shell-exec wt"]
+  # - commands: ["shell-exec wt"]
     # - commands: ["shell-exec wsl"]
-    bindings: ["alt+enter"]
+    # bindings: ["alt+enter"]
     # Launch CMD terminal. Alternatively, use `shell-exec wezterm-gui` or
 
     # Terminal and Git Bash respectively.
