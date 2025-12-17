@@ -15,7 +15,17 @@ Abre el inicio de Windows [lo ejecuto desde overline theme [Zebar topbar]
 Abre el inicio de Windows [lo ejecuto desde overline theme [Zebar topbar]
 [.vbs es mas rapido, y va dentro de .rclone] 
 
-[Y LA CARPETA RCLONE?] + ¿Donde copiarlos?
+
+░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀
+▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░
+
+█▀▄ █▀▀ █▀█ █▀▀ █▄░█ █▀▄ █▀▀ █▄░█ █▀▀ █ ▄▀█ █▀
+█▄▀ ██▄ █▀▀ ██▄ █░▀█ █▄▀ ██▄ █░▀█ █▄▄ █ █▀█ ▄█
+
+░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀
+▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░ ▄▀░░
+
+❌🧺 LO ELIMINE BTW ~ [Y LA CARPETA RCLONE?] + ¿Donde copiarlos? < ~ ❌🧺 LO ELIMINE BTW
 
 4 - {rclone-v1.71.2-windows-amd64} - CLOUD Google Drive 
 - Es un portable
@@ -28,3 +38,15 @@ rclone-v1.71.2-windows-amd64 \ README.txt
 COPIA EL PORTABLE DE RCLONE EN:
 C:\Users\Diego\Desktop\
 
+5 - {winutil} > - (Chris Titus Utils)s
+- Util, Local sin internet.
+
+- UBICALO Y MUEVELO A:
+C:\Users\Diego
+		(respectivo usuario)
+
+6 - {winwal} > - {Pywal de Windows}
+- Util, Automatizado con Nvim, Programado por Mi (en parte)
+
+- UBICALO Y MUEVELO A:
+C:\Users\Diego\Documents
