@@ -1,0 +1,37 @@
+
+// ✏️ VS Code › Guides: Bracket Pairs
+// Controla si están habilitadas las guías de pares de corchetes
+
+○ Abrí la configuración de VS Code (Ctrl + ,)
+
+○ En el buscador escribí:
+editor.guides.bracketPairs
+// que esto lo porias poner en la la config.json, o como esta abajo..
+
+○ Activá la casilla ✅ para habilitarlo
+
+
+
+// ------------------------------------------------------------
+
+// INSTALA LA EXTENSIÓN: https://marketplace.visualstudio.com/items?itemName=oderwat.indent-rainbow
+// PALETA DE COLORES PARA INDENT RAINBOW EN VS CODE
+// PUEDO USARLO DE REFERENCIA PARA NEOVIM, OTRO EDITOR.
+{
+"indentRainbow.colors": [
+  "rgba(255, 175, 206, 0.5)",
+  "rgba(108, 245, 245, 0.3)",
+  "rgba(255,127,255,0.3)",
+  "rgba(68, 230, 122, 0.3)",
+  "rgba(221, 200, 131, 0.5)", 
+  "rgba(255, 255, 255, 0.3)"
+],
+"indentRainbow.indicatorStyle": "light",
+"indentRainbow.lightIndicatorStyleLineWidth": 1,
+"indentRainbow.includedLanguages": ["python", "javascript"],
+"indentRainbow.excludedLanguages": ["plaintext"],
+"indentRainbow.errorColor": "rgba(128,32,32,0.6)",
+"indentRainbow.tabmixColor": "rgba(128,32,96,0.6)"
+  //aqui el bracketPairs
+editor.guides.bracketPairs
+}

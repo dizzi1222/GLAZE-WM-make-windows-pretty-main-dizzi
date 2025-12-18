@@ -1,0 +1,6 @@
+1- Ubicacion:
+/home/diego/.config/Code/User
+
+2- Copiar y pegar:
+~ settings.json
+~ keybinddings.json

@@ -153,8 +153,8 @@ window_rules:
   # MUSIC
   - commands: ["move --workspace 2"]
     match:
-      # Move browsers to workspace 1.
-      - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
+      # Move browsers to workspace 2.
+      # - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
       # kew terminal god
 
   # ---------------- ignorar ----------------------

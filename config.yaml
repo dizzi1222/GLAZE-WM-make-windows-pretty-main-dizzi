@@ -151,9 +151,9 @@ window_rules:
       - window_process: { regex: "msedge|brave|chrome|firefox" }
 
   # MUSIC
-  # - commands: ["move --workspace 2"]
-    # match:
-      # Move browsers to workspace 1.
+  - commands: ["move --workspace 2"]
+    match:
+      # Move browsers to workspace 2.
       # - window_process: { regex: "spotify|footbar|vlc|youtube|kew" }
       # kew terminal god
 

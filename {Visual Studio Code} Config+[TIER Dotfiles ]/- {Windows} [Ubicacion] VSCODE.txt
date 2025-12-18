@@ -1,0 +1,6 @@
+1- Ubicacion:
+C:\Users\Diego.DESKTOP-0CQHRL5\AppData\Roaming\Code\User
+
+2- Copiar y pegar:
+~ settings.json
+~ keybinddings.json
