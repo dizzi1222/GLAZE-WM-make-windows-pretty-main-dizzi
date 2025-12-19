@@ -357,7 +357,7 @@
       "command": "-workbench.action.lastEditorInGroup"
     },
     {
-      "key": "shift+1",
+      "key": "ctrl+alt+1",
       "command": "workbench.action.focusFirstEditorGroup"
     },
     {
@@ -365,7 +365,7 @@
       "command": "-workbench.action.focusFirstEditorGroup"
     },
     {
-      "key": "shift+8",
+      "key": "ctrl+alt+8",
       "command": "workbench.action.focusEighthEditorGroup"
     },
     {
@@ -373,7 +373,7 @@
       "command": "-workbench.action.focusEighthEditorGroup"
     },
     {
-      "key": "shift+5",
+      "key": "ctrl+alt+5",
       "command": "workbench.action.focusFifthEditorGroup"
     },
     {
@@ -381,7 +381,7 @@
       "command": "-workbench.action.focusFifthEditorGroup"
     },
     {
-      "key": "shift+4",
+      "key": "ctrl+alt+4",
       "command": "workbench.action.focusFourthEditorGroup"
     },
     {
@@ -389,7 +389,7 @@
       "command": "-workbench.action.focusFourthEditorGroup"
     },
     {
-      "key": "shift+2",
+      "key": "ctrl+alt+2",
       "command": "workbench.action.focusSecondEditorGroup"
     },
     {
@@ -397,7 +397,7 @@
       "command": "-workbench.action.focusSecondEditorGroup"
     },
     {
-      "key": "shift+7",
+      "key": "ctrl+alt+7",
       "command": "workbench.action.focusSeventhEditorGroup"
     },
     {
@@ -405,7 +405,7 @@
       "command": "-workbench.action.focusSeventhEditorGroup"
     },
     {
-      "key": "shift+6",
+      "key": "ctrl+alt+6",
       "command": "workbench.action.focusSixthEditorGroup"
     },
     {
@@ -413,7 +413,7 @@
       "command": "-workbench.action.focusSixthEditorGroup"
     },
     {
-      "key": "shift+3",
+      "key": "ctrl+alt+3",
       "command": "workbench.action.focusThirdEditorGroup"
     },
     {
@@ -421,7 +421,7 @@
       "command": "-workbench.action.focusThirdEditorGroup"
     },
     {
-      "key": "shift+0",
+      "key": "ctrl+alt+0",
       "command": "workbench.action.focusLastEditorGroup"
 
     },
@@ -444,5 +444,25 @@
       "key": "ctrl+alt+i",
       "command": "-workbench.panel.chat",
       "when": "workbench.panel.chat.view.copilot.active"
+    },
+    // --- Navegación entre pestañas (Buffers) ---
+    // 1. Estilo Vim / Universal (Mejor para teclados pequeños)
+    {
+      "key": "ctrl+[",
+      "command": "workbench.action.previousEditor"
+    },
+    {
+      "key": "ctrl+]",
+      "command": "workbench.action.nextEditor"
+    },
+
+    // 2. Estilo Clásico / Navegador (Lo reactivamos por si acaso)
+    {
+      "key": "ctrl+pageup",
+      "command": "workbench.action.previousEditor"
+    },
+    {
+      "key": "ctrl+pagedown",
+      "command": "workbench.action.nextEditor"
     }
 ]

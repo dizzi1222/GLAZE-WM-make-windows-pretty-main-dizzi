@@ -6,14 +6,24 @@ C:\Users\Diego\Documents\Scripts
 - DESCRIPCION:
 Abre el inicio de Windows [lo ejecuto desde overline theme [Zebar topbar]
 
-{2 - autotiling.py } > - .\GlazeWM-autotiling-python
+{2 - autotiling.py } > - .\GlazeWM
 
 Abre el inicio de Windows [lo ejecuto desde overline theme [Zebar topbar]
 
-{3 - montar_unidades.vbs .py } > - \.rclone-v1.71.2-windows-amd64
+{3 - montar_unidades.vbs .py } > - .\rclone-v1.71.2-windows-amd64
 
 Abre el inicio de Windows [lo ejecuto desde overline theme [Zebar topbar]
 [.vbs es mas rapido, y va dentro de .rclone] 
+
+-----
+
+-  ⚠⚠⚠ EXCEPCION ⚠⚠⚠
+- ¿UBICACION?
+C:\Users\Diego\Documents\winwal
+
+{4 - WalManager.psm1} > .\winwal
+
+*biblia*[Con esto creo un modulo para importarlo a pwsh, y asi utilizar la api de winwal en nvim y poder usar pywal [Color del fondo] en nvim themes.]
 
 
 ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀ ░░▄▀

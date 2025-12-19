@@ -131,13 +131,13 @@ async def apply_intelligent_vertical_tiling(window):
         current_size = window.get("tilingSize", 1.0)
 
         if current_size >= 0.85:  # Probablemente primera ventana
-            await send_glazewm_command("resize", "--height", "50%")
+            # await send_glazewm_command("resize", "--height", "50%")
             print("📏 Tamaño ajustado: 70% (primera ventana)")
         elif current_size >= 0.6:  # Segunda ventana
-            await send_glazewm_command("resize", "--height", "50%")
+            # await send_glazewm_command("resize", "--height", "50%")
             print("📏 Tamaño ajustado: 50% (segunda ventana)")
         else:  # Tercera o más ventanas
-            await send_glazewm_command("resize", "--height", "33%")
+            # await send_glazewm_command("resize", "--height", "33%")
             print("📏 Tamaño ajustado: 33% (múltiples ventanas)")
 
         print("✅ Tiling vertical aplicado exitosamente, Vegetta777!")
@@ -162,7 +162,7 @@ async def floating_window_manager(websocket):
                         print("🪟 Ventana flotante nueva - Ajustando tamaño...")
                         await asyncio.sleep(0.5)
                         # Solo ajustar tamaño, no centrar (comando no existe)
-                        await send_glazewm_command("resize", "--width", "85%", "--height", "80%")
+                        # await send_glazewm_command("resize", "--width", "85%", "--height", "80%")
 
             await asyncio.sleep(0.1)
 
