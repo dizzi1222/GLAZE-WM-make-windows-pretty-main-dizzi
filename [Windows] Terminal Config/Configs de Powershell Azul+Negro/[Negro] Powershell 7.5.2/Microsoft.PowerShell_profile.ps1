@@ -1,189 +1,51 @@
-# -----------------------------------------------------------
-# 🔹RESUMEN DE MAPEOS... DE POWERSHELL:🔹
-# -----------------------------------------------------------
-#🔹 PSReadLine (predicciones y navegación)🔹
+# ═══════════════════════════════════════════════════════════
+# PERFIL POWER SHELL 7
+# ═══════════════════════════════════════════════════════════
 
-# F2 → Alterna entre ListView (lista) e InlineView (texto fantasma gris).
-
-# Tab → MenuComplete → muestra un menú con opciones de comandos/carpetas/ejecutables.
-
-# Ctrl+Space → (igual que Tab, si lo tienes mapeado) menú de completado.
-
-# ↑ / ↓ → Historial normal de comandos.
-
-# Ctrl+r (sin PSFzf) → búsqueda incremental de historial.
-
-#🔹 PSFzf (historial + búsqueda con fzf)🔹
-
-# Ctrl+r → Historial con fzf interactivo (mucho más potente que el de PSReadLine).
-
-# Ctrl+t → Selector fzf de archivos/carpetas para autocompletar en la línea.
-
-#🔹 Zoxide🔹
-
-# cd <palabra> → salta rápido a carpetas visitadas (aprende de tu historial).
-
-# z <palabra> → lo mismo que arriba (alias corto).
-
-#🔹 Alias personalizados🔹
-
-# ls-a → Get-ChildItem -Force (lista archivos ocultos, tipo ls -a).
-
-#npm → apunta a npm.cmd (evita que salga el .cmd feo en autocompletado).
-
-# -----------------------------------------------------------
-# 🔹INSTALACION DE MODULOS🔹
-# -----------------------------------------------------------
-
-# 0. Instalacion previa de modulos.
-
-#📌 IMPORTANTE: Los comandos de instalación (Install-Module)
-
-# no deben estar en este archivo. Solo se ejecutan una vez.
-# Instalaciones nuevas:
-# Install-Module -Name ZLocation -Force
-# Install-Module -Name CompletionPredictor -Force
-# winget install ajeetdsouza.zoxide
-# winget install --id GitHub.cli -e --source winget # instalar github gh cli
-# winget install --id Microsoft.PowerToys -e --scope machine
-# winget install fzf
-# winget install junegunn.fzf
-# Install-Module -Name PSFzf -Force
-# gh extension install meiji163/gh-notify
-# gh ext install meiji163/gh-notify
-# scoop install fd
-# scoop install ripgrep
-# iwr -useb get.scoop.sh | iex
-
-# 	DESINSTALA E INSTALA nodejs:
-# scoop uninstall nodejs-lts
-# scoop install nodejs-lts
-# npm install -g neovim
-# $env:PATH += ";C:\Users\Diego\scoop\shims"
-# t
-#                  [tu usuario]
-
-#	 INSTALA python-pi:
-# pip install pynvim
-# pip install 'python-lsp-server[all]'
-
-#📌 Otras instalaciones para NVIM dizzigentleman:
-
-# 	INSTALA CHOCHO y luego mingw:
-#Set-ExecutionPolicy Bypass -Scope Process -Force
-#[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-#iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-#choco install mingw
-
-# LUEGO ABRE NVIM. Ejecuta: Lazy sync, luego: Mason [con 2 puntos :] .. y por ultimo:
-# :MasonInstall --force prettier markdownlint-cli2 markdown-toc vtsls
-
-# :MasonInstall --force angular-language-server lua-language-server marksman eslint-lsp eslint_d emmylua_ls markdown
-
-# -----------------------------------------------------------
-# 🔹ARCHIVO DE PERFIL DE POWERSHELL🔹
-# -----------------------------------------------------------
-
-# 1. Configuración de idioma
+# 1. Idioma / encoding
 $env:PSCORE_ICU_INVARIANT = 1
 $env:LC_ALL = 'C.UTF-8'
 $env:LANG = 'C.UTF-8'
 
-# 2. Inicialización de Oh My Posh
-# La ruta puede variar, usa la correcta
-#& 'C:\Users\Diego\AppData\Local\oh-my-posh\init.1485567614143659716.ps1'
-$env:POSH_SESSION_ID = "0dc46671-78eb-4a28-9e0d-53c78ecf680c"; & 'C:\Users\Diego\AppData\Local\oh-my-posh\init.1485567614143659716.ps1'
+# 2. Oh My Posh (tema dracula)
+$ompTheme = "C:\Program Files\WindowsApps\ohmyposh.cli_30.6.2.0_x64__96v55e8n804z4\themes\dracula.omp.json"
+if (Test-Path $ompTheme) {
+    oh-my-posh init pwsh --config $ompTheme | Invoke-Expression
+}
 
-# 3. 📌 Importación de módulos esenciales
-
+# 3. Módulos
 Import-Module PSReadLine
 Import-Module Terminal-Icons
-Import-Module CompletionPredictor
 Import-Module PSFzf
-# Importar winwal [Pywal, para poder usarlo en WT, nvim wallwaper]
-Import-Module ~\Documents\winwal\winwal.psm1 -DisableNameChecking
-Import-Module ~\Documents\winwal\WalManager.psm1 -DisableNameChecking
-# Luego ZLocation - para evitar sobreescribir el prompt suggestion.
-#Import-Module ZLocation # LO ELIMINE PORQUE SIEMPRE CRASHEA.
+Import-Module ZLocation
 
-# PSScriptAnalyzer no necesita ser importado en el perfil.
-
-# Autocompletado y autocorrección
+# 4. PSReadLine: predicciones y menú
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin
-#Set-PSReadLineOption -PredictionViewStyle ListView
-# ¿Prefieras todo en una sola linea fantasma gris y no una lista? descomenta Inline y comenta Listview.
 Set-PSReadLineOption -PredictionViewStyle InlineView
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd:$true
+Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
+    [Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete($null)
+}
 
-# 🐔✍📌¡¡TRUCAZO!! En vez de remapear List view como Inline y perder la lista
-# Simplemente presiona F2 para alternar de modo segun convenga!
-
-# 4. Alias de ls
-# Alias para que 'ls' muestre todo como ls -a
-Set-Alias ls-a Get-ChildItem -Force
-
-# 5. Arrancar zoxide para mejorar sugerencias con z.. z = cd
+# 5. zoxide (cd inteligente)
 Invoke-Expression (& { (zoxide init powershell --cmd cd | Out-String) })
 
-# 6. PSReadLine MenuComplete (Ctrl+Space)
-
-# Esto hace que Tab abra el menú de comandos y ejecutables
-Set-PSReadLineKeyHandler -Key Tab -ScriptBlock {
-  [Microsoft.PowerShell.PSConsoleReadLine]::MenuComplete($null)
-}
-
-
-# 7. Alias para npm
-# Alias para evitar que npm.cmd se autocomplete en MenuComplete
-# SOLUCION *esto pasaba porque .cmd era la unica opcion aparte de npm al ejecutar Ctrl+Space):
-Set-Alias npm npm.cmd
-
-# 8 configurar ruta de NPM Y NODE
-$env:PATH += ";C:\Users\Diego\scoop\shims"
-$env:PATH += ";C:\Users\Diego.DESKTOP-0CQHRL5\.npm-global\bin"
-
-#9 PSFZF para buscar comandos [Ctrl+R] y [Ctrl+T] para Filtrar busqueda pro
-
+# 6. PSFzf: Ctrl+r historial, Ctrl+t archivos
 Set-PsFzfOption -PSReadLineChordProvider 'Ctrl+t' -PSReadLineChordReverseHistory 'Ctrl+r'
 
-#10 NOTEPAD - notepads.exe de la store xd
+# 7. Alias
+Set-Alias ls-a Get-ChildItem -Force
 
-function notepad {
-  param(
-    [string]$Path = $null
-  )
-  if (-not $Path) {
-    Start-Process -FilePath "notepads.exe"
-  }
-  else {
-    $path = $Path.Replace("/", "\")
-    Start-Process -FilePath "notepads.exe" -ArgumentList $path
-  }
-}
-# 📌 [Abrir Antigravity o VSCode]
-# Si Antigravity está instalado, lo abre; si no, abre > Cursor > VSCode
-function code {
-  param([string]$Path = ".")
-  $antigravityPath = "$env:LOCALAPPDATA\Programs\Antigravity\Antigravity.exe"
-  $cursorPath = "$env:LOCALAPPDATA\Programs\Cursor\Cursor.exe"
-  $codePath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
-
-  if ($Path -and $Path -ne ".") { $Path = $Path.Replace("/", "\") }
-
-  if (Test-Path $antigravityPath) { & $antigravityPath $Path }
-  elseif (Test-Path $cursorPath) { & $cursorPath $Path }
-  elseif (Test-Path $codePath) { & $codePath $Path }
-  else { & code.exe $Path }
+# 8. Cargar API keys (.api-keys.sh) en la sesión.
+# Seguro: ignora las líneas que referencian otras vars (ej. OCO_API_KEY="$OPEN_ROUTER_API_KEY")
+# para no pisar el valor real que ya viene persistido en el entorno (User).
+if (Test-Path "$env:USERPROFILE\.api-keys.sh") {
+    Get-Content "$env:USERPROFILE\.api-keys.sh" | ForEach-Object {
+        if ($_ -match '^export ([A-Z_0-9]+)="([^"]+)"' -and $matches[2] -notmatch '\$') {
+            Set-Item -Path "Env:$($matches[1])" -Value $matches[2] -ErrorAction SilentlyContinue
+        }
+    }
 }
 
-# 📌 Abrir únicamente vscode (FUERA de la función code)
-function vscode {
-  param([string]$Path = ".")
-  $codePath = "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe"
-  if ($Path -and $Path -ne ".") { $Path = $Path.Replace("/", "\") }
-  if (Test-Path $codePath) { & $codePath $Path }
-  else { & code.exe $Path }
-}
-
-# Ejecuta con dot-sourcing- CARGAR APIS-keys en la sesion actual.
+# Ejecuta con dot-sourcing - CARGAR API keys (setx -> permanentes) en la sesion actual.
 . .\.api-keys.ps1
