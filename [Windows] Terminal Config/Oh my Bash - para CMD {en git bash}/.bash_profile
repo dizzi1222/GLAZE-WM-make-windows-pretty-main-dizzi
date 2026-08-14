@@ -8,3 +8,8 @@ source ~/.minttyrc
 if [[ -f ~/.bashrc ]]; then
   source ~/.bashrc
 fi
+
+# Cargar API keys (OLLAMA, OPENROUTER, DEEPSEEK, GOOGLE, etc.)
+if [ -f ~/.api-keys.sh ]; then
+    . ~/.api-keys.sh
+fi

@@ -33,3 +33,8 @@ OMB_USE_SUDO=true
 completions=(git composer ssh)
 aliases=(general)
 plugins=(git bashmarks)
+
+# Cargar API keys
+if [ -f ~/.api-keys.sh ]; then
+    . ~/.api-keys.sh
+fi

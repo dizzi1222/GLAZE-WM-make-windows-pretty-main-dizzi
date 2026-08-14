@@ -1,0 +1,4 @@
+# Copy/Paste estilo Windows (Ctrl+C / Ctrl+V) en Git Bash mintty
+CopyOnSelect=yes
+CtrlShiftShortcuts=yes
+CtrlExchangeShift=yes
