@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "compaction": {
+    "auto": false,
+    "keep": {
+      "tokens": 10000
+    }
+  },
+  "model": "opencode/deepseek-v4-flash-free",
+  "small_model": "opencode/deepseek-v4-flash-free",
+  "mcp": {
+    "engram": {
+      "type": "local",
+      "command": [
+        "C:\\Users\\Administrator\\workspace\\PTDOfficial\\engram\\engram.exe",
+        "mcp",
+        "--tools=agent"
+      ],
+      "enabled": false
+    },
+    "figma": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key={env:FIGMA_API_KEY}",
+        "--stdio"
+      ],
+      "enabled": true
+    },
+    "composio-connect": {
+      "type": "remote",
+      "url": "https://connect.composio.dev/mcp",
+      "enabled": true,
+      "headers": {
+        "x-api-key": "{env:COMPOSIO_API_KEY}"
+      }
+    },
+    "dataimpulse": {
+      "type": "local",
+      "command": [
+        "node",
+        "C:\\Users\\Administrator\\workspace\\dataimpulse-mcp\\index.js"
+      ],
+      "environment": {
+        "DI_USER": "{env:DI_USER}",
+        "DI_PASS": "{env:DI_PASS}"
+      },
+      "enabled": true
+    }
+  },
+  "plugin": [
+    "opencode-gemini-auth@latest",
+    "file:///C:/Users/Administrator/workspace/opencode-discord-rpc"
+  ],
+  "provider": {
+    "google": {
+      "options": {
+        "apiKey": "{env:GOOGLE_API_KEY}",
+        "projectId": "cic-ptd-dev"
+      },
+      "models": {
+        "gemini-2.5-flash": { "options": {} },
+        "gemini-2.5-pro": { "options": {} },
+        "gemini-3-flash-preview": { "options": {} },
+        "gemini-3-pro-preview": { "options": {} }
+      }
+    },
+    "ollama": {
+      "models": {
+        "nemotron-3-super:cloud": {
+          "name": "nemotron-3-super:cloud",
+          "options": {}
+        }
+      },
+      "name": "Ollama (local)",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "apiKey": "{env:OLLAMA_API_KEY}",
+        "baseURL": "http://127.0.0.1:11434/v1"
+      }
+    },
+    "opencode": { "options": {} },
+    "openai": { "options": { "apiKey": "{env:OPENAI_API_KEY}" } },
+    "anthropic": { "options": { "apiKey": "{env:ANTHROPIC_API_KEY}" } },
+    "openrouter": { "options": { "apiKey": "{env:OPEN_ROUTER_API_KEY}" } },
+    "deepseek": { "options": { "apiKey": "{env:DEEPSEEK_API_KEY}" } },
+    "copilot": { "options": {} }
+  }
+}
