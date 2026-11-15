@@ -52,7 +52,7 @@
           "WS_HOST_UK",
           "WS_PORT_UK"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-es": {
         "type": "local",
@@ -66,7 +66,7 @@
           "WS_HOST_ES",
           "WS_PORT_ES"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us": {
         "type": "local",
@@ -80,7 +80,7 @@
           "WS_HOST_US",
           "WS_PORT_US"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-2": {
         "type": "local",
@@ -94,7 +94,7 @@
           "WS_HOST_US_2",
           "WS_PORT_US_2"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-3": {
         "type": "local",
@@ -108,7 +108,7 @@
           "WS_HOST_US_3",
           "WS_PORT_US_3"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-pl": {
         "type": "local",
@@ -122,7 +122,7 @@
           "WS_HOST_PL",
           "WS_PORT_PL"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-4": {
         "type": "local",
@@ -136,7 +136,7 @@
           "WS_HOST_US_4",
           "WS_PORT_US_4"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-5": {
         "type": "local",
@@ -150,7 +150,7 @@
           "WS_HOST_US_5",
           "WS_PORT_US_5"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-6": {
         "type": "local",
@@ -164,7 +164,7 @@
           "WS_HOST_US_6",
           "WS_PORT_US_6"
         ],
-        "disabled": false
+        "disabled": true
       },
       "webshare-us-7": {
         "type": "local",
