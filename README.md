@@ -127,3 +127,17 @@ zebar-config config
 		
 PD: Error de principiante, era mejor consultar la documentacion en: 
 https://github.com/glzr-io/glazewm/blob/main/README.md
+## Clic a Y (MuMu / Wild Rift)
+
+Paquete: https://github.com/dizzi1222/Y-Click-setup
+
+* Instalar: doble clic en `INSTALAR.cmd` (o `install.ps1`).
+* Copia AutoHotkey portable + scripts a `%USERPROFILE%\Tools\AutoHotkey`
+  y crea los 2 .lnk: *Clic a Y* y *Detener Clic a Y*.
+* Autostart: `HKCU\...\Run\Clic-a-Y-MuMu` ->
+  `AutoHotkey64.exe "...\mumu-toggle-y-click.ahk" --hotkey`
+* Atajos: **Ctrl+Y** y **Alt+Y** encienden/apagan el mapeo.
+  Invisible: sin ventana ni icono de bandeja.
+* No mapear esto en PowerToys *Start App*: detecta `AutoHotkey64.exe`
+  en ejecucion y abre ventana en vez de alternar.
+* Requisito: raton en modo **diestro** (Panel de control > Mouse).
