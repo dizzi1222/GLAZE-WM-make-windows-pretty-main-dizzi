@@ -22,8 +22,6 @@
       "figma": {
         "type": "local",
         "command": [
-          "npx",
-          "-y",
           "figma-developer-mcp",
           "--figma-api-key={env:FIGMA_API_KEY}",
           "--stdio"
@@ -35,6 +33,146 @@
         "url": "https://connect.composio.dev/mcp",
         "headers": {
           "x-api-key": "{env:COMPOSIO_API_KEY}"
+        },
+        "disabled": false
+      },
+      "webshare-uk": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_UK}",
+          "DI_PROXY_PORT": "{env:WS_PORT_UK}"
+        },
+        "disabled": false
+      },
+      "webshare-es": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_ES}",
+          "DI_PROXY_PORT": "{env:WS_PORT_ES}"
+        },
+        "disabled": false
+      },
+      "webshare-us": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US}"
+        },
+        "disabled": false
+      },
+      "webshare-us-2": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_2}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_2}"
+        },
+        "disabled": false
+      },
+      "webshare-us-3": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_3}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_3}"
+        },
+        "disabled": false
+      },
+      "webshare-pl": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_PL}",
+          "DI_PROXY_PORT": "{env:WS_PORT_PL}"
+        },
+        "disabled": false
+      },
+      "webshare-us-4": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_4}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_4}"
+        },
+        "disabled": false
+      },
+      "webshare-us-5": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_5}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_5}"
+        },
+        "disabled": false
+      },
+      "webshare-us-6": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_6}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_6}"
+        },
+        "disabled": false
+      },
+      "webshare-us-7": {
+        "type": "local",
+        "command": [
+          "node",
+          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+        ],
+        "environment": {
+          "DI_USER": "{env:WS_USER}",
+          "DI_PASS": "{env:WS_PASS}",
+          "DI_PROXY_HOST": "{env:WS_HOST_US_7}",
+          "DI_PROXY_PORT": "{env:WS_PORT_US_7}"
         },
         "disabled": false
       }
