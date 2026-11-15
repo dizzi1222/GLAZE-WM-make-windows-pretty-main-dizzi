@@ -13,9 +13,13 @@
       "engram": {
         "type": "local",
         "command": [
-          "C:/Users/Administrator/bin/engram.exe",
-          "mcp",
-          "--tools=agent"
+          "powershell",
+          "-NoProfile",
+          "-NonInteractive",
+          "-WindowStyle",
+          "Hidden",
+          "-Command",
+          "& 'C:/Users/Administrator/bin/engram.exe' mcp --tools=agent"
         ],
         "disabled": false
       },
@@ -39,141 +43,141 @@
       "webshare-uk": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_UK",
+          "WS_PORT_UK"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_UK}",
-          "DI_PROXY_PORT": "{env:WS_PORT_UK}"
-        },
         "disabled": false
       },
       "webshare-es": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_ES",
+          "WS_PORT_ES"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_ES}",
-          "DI_PROXY_PORT": "{env:WS_PORT_ES}"
-        },
         "disabled": false
       },
       "webshare-us": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US",
+          "WS_PORT_US"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US}"
-        },
         "disabled": false
       },
       "webshare-us-2": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_2",
+          "WS_PORT_US_2"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_2}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_2}"
-        },
         "disabled": false
       },
       "webshare-us-3": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_3",
+          "WS_PORT_US_3"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_3}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_3}"
-        },
         "disabled": false
       },
       "webshare-pl": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_PL",
+          "WS_PORT_PL"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_PL}",
-          "DI_PROXY_PORT": "{env:WS_PORT_PL}"
-        },
         "disabled": false
       },
       "webshare-us-4": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_4",
+          "WS_PORT_US_4"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_4}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_4}"
-        },
         "disabled": false
       },
       "webshare-us-5": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_5",
+          "WS_PORT_US_5"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_5}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_5}"
-        },
         "disabled": false
       },
       "webshare-us-6": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_6",
+          "WS_PORT_US_6"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_6}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_6}"
-        },
         "disabled": false
       },
       "webshare-us-7": {
         "type": "local",
         "command": [
-          "node",
-          "C:/Users/Administrator/workspace/dataimpulse-mcp/index.js"
+          "powershell",
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
+          "WS_HOST_US_7",
+          "WS_PORT_US_7"
         ],
-        "environment": {
-          "DI_USER": "{env:WS_USER}",
-          "DI_PASS": "{env:WS_PASS}",
-          "DI_PROXY_HOST": "{env:WS_HOST_US_7}",
-          "DI_PROXY_PORT": "{env:WS_PORT_US_7}"
-        },
         "disabled": false
       }
     }
