@@ -920,17 +920,22 @@ async function speakAssistantResponse(text: string): Promise<void> {
   if (IS_WINDOWS) {
     const rate = Math.max(-10, Math.min(10, Math.round((Number(speed) - 165) / 20)))
     const script = [
+      "$ErrorActionPreference = 'Stop'",
       "Add-Type -AssemblyName System.Speech",
       "$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer",
+      "$reader = [System.IO.StreamReader]::new([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)",
+      "try {",
       `$synth.Rate = ${Number.isFinite(rate) ? rate : 0}`,
-      "$voice = $synth.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.Name -like '" + language + "*' } | Select-Object -First 1",
+      "$voice = $synth.GetInstalledVoices() | Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -like ($env:OPENCODE_TTS_LANGUAGE + '*') } | Select-Object -First 1",
       "if ($voice) { $synth.SelectVoice($voice.VoiceInfo.Name) }",
-      "$synth.Speak([Console]::In.ReadToEnd())",
-      "$synth.Dispose()",
-    ].join("; ")
+      "$synth.Speak($reader.ReadToEnd())",
+      "} finally { $reader.Dispose(); $synth.Dispose() }",
+    ].join("\n")
 
-    const child = spawn(speaker, ["-NoProfile", "-NonInteractive", "-Command", script], {
-      env: AUDIO_ENV,
+    const child = spawn(speaker, [
+      "-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64"),
+    ], {
+      env: { ...AUDIO_ENV, OPENCODE_TTS_LANGUAGE: language },
       stdio: ["pipe", "ignore", "pipe"],
       windowsHide: true,
     })
