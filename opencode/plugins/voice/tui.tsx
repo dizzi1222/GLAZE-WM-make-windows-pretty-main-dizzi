@@ -1,7 +1,7 @@
 import { Plugin } from "@opencode/plugin/tui"
 import { randomUUID } from "node:crypto"
 import { accessSync, constants, existsSync, mkdirSync, mkdtempSync, rmSync, statSync } from "node:fs"
-import { execFile, execFileSync, spawn, type ChildProcess } from "node:child_process"
+import { execFile, spawn, spawnSync, type ChildProcess } from "node:child_process"
 import { delimiter, join } from "node:path"
 import { homedir, platform, tmpdir } from "node:os"
 import { promisify } from "node:util"
@@ -223,29 +223,13 @@ function findWindowsAudioDevice(ffmpeg: string): string | null {
     return windowsAudioDevice
   }
 
-  let stderr = ""
-  try {
-    execFileSync(ffmpeg, ["-hide_banner", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], {
-      encoding: "utf8",
-      timeout: 10000,
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true,
-    })
-  } catch (error) {
-    stderr = String((error as { stderr?: string }).stderr ?? "")
-  }
-  if (!stderr) {
-    try {
-      const result = execFileSync(
-        ffmpeg,
-        ["-hide_banner", "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
-        { encoding: "utf8", timeout: 10000, stdio: ["ignore", "pipe", "pipe"], windowsHide: true },
-      )
-      stderr = String(result)
-    } catch {}
-  }
-
-  const devices = [...stderr.matchAll(/"([^"]+)"\s*\(audio\)/gi)].map((match) => match[1])
+  const result = spawnSync(
+    ffmpeg,
+    ["-hide_banner", "-list_devices", "true", "-f", "dshow", "-i", "dummy"],
+    { encoding: "utf8", timeout: 10000, stdio: ["ignore", "pipe", "pipe"], windowsHide: true },
+  )
+  const output = [result.stderr, result.stdout, result.error?.message].filter(Boolean).join("\n")
+  const devices = [...output.matchAll(/"([^"]+)"\s*\(audio\)/gi)].map((match) => match[1])
   const ranked = devices
     .map((name, index) => ({ name, index, score: rankWindowsAudioDevice(name) }))
     .sort((left, right) => right.score - left.score || left.index - right.index)
