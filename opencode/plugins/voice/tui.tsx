@@ -1031,7 +1031,7 @@ async function speakAssistantResponse(text: string): Promise<void> {
 }
 
 /** Habla la última respuesta completa y vuelve al micrófono si Live sigue activo. */
-async function finishLiveTurn(context: any, sessionID: string): Promise<void> {
+async function finishLiveTurn(context: any, sessionID: string, interrupted = false): Promise<void> {
   const live = state.live
   if (!live.active || !live.awaitingResponse || live.sessionID !== sessionID) return
 
@@ -1056,7 +1056,7 @@ async function finishLiveTurn(context: any, sessionID: string): Promise<void> {
     } catch (error) {
       if (live.active) toast(context, `No pude hablar la respuesta: ${(error as Error).message}`, "error", "Live", 7000)
     }
-  } else {
+  } else if (!interrupted) {
     live.fallbackAgent ??= "agy"
     try {
       await speakAcpFallback(context, live.pendingTranscript)
@@ -1075,16 +1075,18 @@ async function finishLiveTurn(context: any, sessionID: string): Promise<void> {
   startLiveListener(context, sessionID)
 }
 
-/** Guarda las partes de texto emitidas por la respuesta del asistente en Live. */
-function collectLiveResponse(event: any): void {
+/** Conserva el texto recibido incluso si la ejecución se interrumpe a mitad de respuesta. */
+function collectLiveResponse(event: any, complete: boolean): void {
   const live = state.live
   if (!live.active || !live.awaitingResponse || event?.data?.sessionID !== live.sessionID) return
 
-  live.responseParts.push({
-    messageID: event.data.assistantMessageID,
-    ordinal: event.data.ordinal,
-    text: event.data.text,
-  })
+  const { assistantMessageID, ordinal, text, delta } = event.data
+  const incoming = complete ? text : delta
+  if (typeof assistantMessageID !== "string" || typeof ordinal !== "number" || typeof incoming !== "string") return
+
+  const part = live.responseParts.find((item) => item.messageID === assistantMessageID && item.ordinal === ordinal)
+  if (part) part.text = complete ? incoming : part.text + incoming
+  else live.responseParts.push({ messageID: assistantMessageID, ordinal, text: incoming })
 }
 
 /** Completa la ronda de voz cuando OpenCode marca la sesión como inactiva. */
@@ -1113,19 +1115,12 @@ function handleLiveError(context: any, event: any): void {
   if (typeof sessionID === "string") void finishLiveTurn(context, sessionID)
 }
 
-/** Descarta el turno cancelado y devuelve Live al micrófono sin responderlo. */
+/** Reproduce el texto recibido y vuelve al micrófono si la ejecución se interrumpe. */
 function handleLiveInterrupted(context: any, event: any): void {
-  const live = state.live
   const sessionID = event?.data?.sessionID
-  if (!live.active || !live.awaitingResponse || sessionID !== live.sessionID) return
-
-  live.awaitingResponse = false
-  live.hasObservedBusy = false
-  live.responseParts = []
-  live.pendingTranscript = ""
-  live.phase = live.muted ? "muted" : "listening"
-  publishLiveStatus()
-  if (!live.muted) startLiveListener(context, sessionID)
+  if (typeof sessionID === "string" && event.data.reason !== "shutdown") {
+    void finishLiveTurn(context, sessionID, true)
+  }
 }
 
 /** Conserva solo los seis intercambios recientes para el contexto de ACP. */
@@ -1479,7 +1474,8 @@ export default Plugin.define({
         </Show>
       ),
     })
-    const removeTextListener = context.data.on("session.text.ended", (event) => collectLiveResponse(event))
+    const removeTextDeltaListener = context.data.on("session.text.delta", (event) => collectLiveResponse(event, false))
+    const removeTextListener = context.data.on("session.text.ended", (event) => collectLiveResponse(event, true))
     const removeIdleListener = context.data.on("session.idle", (event) => handleLiveIdle(context, event))
     const removeStatusListener = context.data.on("session.status", (event) => handleLiveStatus(context, event))
     const removeErrorListener = context.data.on("session.error", (event) => handleLiveError(context, event))
@@ -1575,6 +1571,7 @@ export default Plugin.define({
     }))
 
     return async () => {
+      removeTextDeltaListener()
       removeTextListener()
       removeIdleListener()
       removeStatusListener()

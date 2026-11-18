@@ -298,6 +298,7 @@ function startCapture(onFrame, onEnd) {
       "-ac", String(CHANNELS),
       "-f", "s16le",
       "-acodec", "pcm_s16le",
+      "-flush_packets", "1",
       "-",
     ],
     { stdio: ["ignore", "pipe", "pipe"], windowsHide: true },
