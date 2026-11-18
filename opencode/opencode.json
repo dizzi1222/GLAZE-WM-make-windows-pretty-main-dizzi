@@ -8,6 +8,9 @@
   },
   "model": "opencode/deepseek-v4-flash-free",
   "small_model": "opencode/deepseek-v4-flash-free",
+  "experimental": {
+    "todo": true
+  },
   "mcp": {
     "servers": {
       "engram": {

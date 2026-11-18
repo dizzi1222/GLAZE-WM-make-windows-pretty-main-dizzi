@@ -3,7 +3,8 @@
  * opencode-voice (Windows) — dictado por voz para OpenCode.
  *
  * Graba del micrófono con FFmpeg/DirectShow, segmenta por silencio (VAD por RMS
- * adaptativo) y transcribe cada frase con Gemini (o OpenAI Whisper), emitiendo
+ * adaptativo) y transcribe sin cuota con Windows Speech Recognition por defecto
+ * (o con Gemini/OpenAI API si se eligen explícitamente), emitiendo
  * NDJSON por stdout para que el plugin TUI lo consuma.
  *
  * Uso:
@@ -14,15 +15,15 @@
  *   opencode-voice devices             # lista micrófonos DirectShow
  *
  * Variables de entorno:
- *   VOICE_PROVIDER   gemini | openai        (def. gemini)
- *   VOICE_MODEL      gpt-4o-mini-transcribe | whisper-1 | gemini-2.5-flash
+ *   VOICE_PROVIDER   windows | gemini | openai (def. windows)
+ *   VOICE_MODEL      modelo opcional para Gemini/OpenAI API
  *   VOICE_LANGUAGE   es | en | ...          (def. es)
  *   VOICE_SILENCE_MS silencio que cierra la frase (def. 700)
  *   VOICE_THRESHOLD  umbral RMS 0..1 forzado (si se omite, adaptativo)
  *   VOICE_DEVICE     nombre del micrófono DirectShow (def. autodetección)
  *   FFMPEG_PATH      ruta explícita a ffmpeg.exe
  */
-import { spawn, spawnSync } from "node:child_process"
+import { execFile, spawn, spawnSync } from "node:child_process"
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from "node:fs"
 import { homedir, tmpdir } from "node:os"
 import { join } from "node:path"
@@ -38,10 +39,10 @@ const START_FRAMES = 5
 
 const env = process.env
 const config = {
-  provider: env.VOICE_PROVIDER ?? "gemini",
+  provider: env.VOICE_PROVIDER ?? "windows",
   model:
     env.VOICE_MODEL ??
-    (env.VOICE_PROVIDER === "openai" ? "gpt-4o-mini-transcribe" : "gemini-2.5-flash"),
+    (env.VOICE_PROVIDER === "openai" ? "gpt-4o-mini-transcribe" : env.VOICE_PROVIDER === "gemini" ? "gemini-2.5-flash" : "local"),
   language: env.VOICE_LANGUAGE ?? "es",
   silenceMs: Number(env.VOICE_SILENCE_MS ?? 700),
   threshold: env.VOICE_THRESHOLD ? Number(env.VOICE_THRESHOLD) : undefined,
@@ -84,6 +85,41 @@ function apiKey() {
   const key = env.GOOGLE_API_KEY || env.GEMINI_API_KEY
   if (key) return key
   throw new Error("GOOGLE_API_KEY no está definida")
+}
+
+/** Reconocimiento sin red ni cuota con el motor de dictado instalado en Windows. */
+async function transcribeWindows(wav) {
+  if (process.platform !== "win32") throw new Error("VOICE_PROVIDER=windows solo funciona en Windows")
+  const directory = mkdtempSync(join(tmpdir(), "opencode-voice-stt-"))
+  const path = join(directory, "speech.wav")
+  const culture = config.language === "es" ? "es-ES" : config.language === "en" ? "en-US" : config.language
+  const script = [
+    "[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)",
+    "Add-Type -AssemblyName System.Speech",
+    `$culture = [System.Globalization.CultureInfo]::GetCultureInfo('${culture.replace(/'/g, "''")}')`,
+    "$recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine($culture)",
+    "try {",
+    "  $recognizer.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar))",
+    "  $recognizer.SetInputToWaveFile($env:OPENCODE_VOICE_WAV)",
+    "  $result = $recognizer.Recognize([TimeSpan]::FromSeconds(35))",
+    "  if ($result) { [Console]::WriteLine($result.Text) }",
+    "} finally { $recognizer.Dispose() }",
+  ].join("\n")
+  try {
+    writeFileSync(path, wav)
+    return await new Promise((resolve, reject) => {
+      execFile("powershell.exe", [
+        "-NoProfile", "-NonInteractive", "-EncodedCommand",
+        Buffer.from(script, "utf16le").toString("base64"),
+      ], { encoding: "utf8", timeout: 25000, windowsHide: true, env: { ...env, OPENCODE_VOICE_WAV: path } },
+      (error, stdout, stderr) => {
+        if (error) reject(new Error(`Reconocimiento de Windows: ${String(stderr).trim() || error.message}`))
+        else resolve(String(stdout).trim())
+      })
+    })
+  } finally {
+    rmSync(directory, { recursive: true, force: true })
+  }
 }
 
 /* ---------------------------------- audio --------------------------------- */
@@ -166,6 +202,7 @@ function resolveDevice() {
 
 async function transcribe(pcm) {
   const wav = toWav(pcm)
+  if (config.provider === "windows") return transcribeWindows(wav)
   if (config.provider === "openai") {
     const form = new FormData()
     form.append("file", new Blob([wav], { type: "audio/wav" }), "speech.wav")
@@ -455,9 +492,10 @@ async function doctor() {
   push(`provider=${config.provider} model=${config.model} language=${config.language}`)
   push(`ffmpeg=${FFMPEG}`)
 
-  const hasKey =
-    config.provider === "openai" ? Boolean(env.OPENAI_API_KEY) : Boolean(env.GOOGLE_API_KEY || env.GEMINI_API_KEY)
-  push(`api_key=${hasKey ? "ok" : "MISSING"}`)
+  const hasKey = config.provider === "windows" || (config.provider === "openai"
+    ? Boolean(env.OPENAI_API_KEY)
+    : Boolean(env.GOOGLE_API_KEY || env.GEMINI_API_KEY))
+  push(`api_key=${config.provider === "windows" ? "no necesaria (Windows local)" : hasKey ? "ok" : "MISSING"}`)
 
   const devices = listDevices()
   push(`devices=${devices.length ? devices.join(" | ") : "NINGUNO"}`)
