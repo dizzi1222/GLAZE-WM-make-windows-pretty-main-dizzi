@@ -355,12 +355,32 @@ interface IVoiceCommand {
   args: string[]
 }
 
+/** Encuentra Node.js real para ejecutar el transcriptor .mjs desde el TUI empaquetado. */
+function findNodeExecutable(): string | null {
+  const candidates = [
+    process.env.OPENCODE_VOICE_NODE,
+    process.env.NODE_BINARY,
+    "node",
+    IS_WINDOWS ? join(process.env.ProgramFiles ?? "C:\\Program Files", "nodejs", "node.exe") : undefined,
+  ]
+
+  for (const candidate of candidates) {
+    if (!candidate) continue
+    const executable = resolveExecutable(candidate)
+    if (executable) return executable
+  }
+
+  return null
+}
+
 /** Resuelve cómo invocar el transcriptor: binario nativo o Node para el script .mjs de Windows. */
 function resolveVoiceCommand(commandArgs: string[]): IVoiceCommand | null {
   const binary = findVoiceBinary()
   if (!binary) return null
   if (IS_WINDOWS && /\.mjs$/i.test(binary)) {
-    return { executable: process.execPath, args: [binary, ...commandArgs] }
+    const node = findNodeExecutable()
+    if (!node) throw new Error("No encuentro node.exe para ejecutar opencode-voice.mjs")
+    return { executable: node, args: [binary, ...commandArgs] }
   }
   return { executable: binary, args: commandArgs }
 }

@@ -29,7 +29,7 @@ Requisitos:
 2. **Micrófono DirectShow**. El plugin elige el primero que parece físico y evita cámaras virtuales como Iriun u OBS. Para forzar otro dispositivo define `VOICE_DEVICE` con el nombre exacto que devuelve `opencode-voice devices`.
 3. **Transcripción**: `GOOGLE_API_KEY` o `GEMINI_API_KEY` (Gemini por defecto) u `OPENAI_API_KEY` con `VOICE_PROVIDER=openai`.
 4. **TTS**: usa `System.Speech` de PowerShell (`SAPI`), incluido en Windows. No requiere eSpeak.
-5. **Transcriptor**: `scripts/opencode-voice.mjs`, copiado a `%USERPROFILE%\.local\bin\opencode-voice.mjs`.
+5. **Transcriptor**: `scripts/opencode-voice.mjs`, copiado a `%USERPROFILE%\.local\bin\opencode-voice.mjs`, y Node.js disponible en `PATH` (o indicado por `OPENCODE_VOICE_NODE`). El TUI debe invocar `node.exe`; `process.execPath` apunta a `opencode.exe` en la app empaquetada y no sirve para ejecutar el `.mjs`.
 
 Instala el transcriptor y comprueba el audio:
 
