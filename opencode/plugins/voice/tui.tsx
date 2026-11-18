@@ -544,7 +544,11 @@ async function restoreLiveModel(sessionID: string): Promise<void> {
 
 //Capture
 /** Espera el cierre del grabador y lo fuerza a terminar si se queda bloqueado. */
-function stopRecorder(child: ChildProcess, signal: NodeJS.Signals = "SIGINT"): Promise<void> {
+function stopRecorder(
+  child: ChildProcess,
+  signal: NodeJS.Signals = "SIGINT",
+  gracefulWindowsFFmpeg = false,
+): Promise<void> {
   return new Promise((resolve) => {
     let stopped = false
 
@@ -565,6 +569,14 @@ function stopRecorder(child: ChildProcess, signal: NodeJS.Signals = "SIGINT"): P
     if (child.exitCode !== null || child.signalCode !== null) {
       finish()
       return
+    }
+
+    if (gracefulWindowsFFmpeg && IS_WINDOWS && child.stdin) {
+      try {
+        child.stdin.write("q\n")
+        child.stdin.end()
+        return
+      } catch {}
     }
 
     child.kill(signal)
@@ -640,7 +652,7 @@ async function stopAndTranscribe(context: any): Promise<void> {
   toast(context, "🧠 Transcribiendo y enviando…", "info", "Voz", 4000)
 
   try {
-    await stopRecorder(recording.child)
+    await stopRecorder(recording.child, "SIGINT", IS_WINDOWS)
     if (!existsSync(recording.rawPath) || statSync(recording.rawPath).size === 0) {
       toast(context, "No se capturó audio; revisa el micrófono", "warning", "Voz", 6000)
       return
@@ -686,7 +698,7 @@ async function cancelRecording(context: any): Promise<void> {
   if (!recording) return
 
   state.recording = null
-  await stopRecorder(recording.child, "SIGTERM")
+  await stopRecorder(recording.child, "SIGTERM", IS_WINDOWS)
   removeRecordingFiles(recording)
   toast(context, "Grabación cancelada", "info", "Voz", 1500)
 }
@@ -1572,7 +1584,7 @@ export default Plugin.define({
       const recording = state.recording
       state.recording = null
       if (recording) {
-        await stopRecorder(recording.child, "SIGKILL")
+        await stopRecorder(recording.child, "SIGKILL", IS_WINDOWS)
         removeRecordingFiles(recording)
       }
     }
