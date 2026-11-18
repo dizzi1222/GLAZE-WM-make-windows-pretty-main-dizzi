@@ -8,6 +8,33 @@ import { promisify } from "node:util"
 import { createSignal, Show } from "solid-js"
 
 type TVoiceBackend = "oauth" | "agy" | "codex"
+type TVoiceSttProvider = "faster-whisper" | "windows" | "openai" | "gemini"
+
+interface IVoiceRouteProfile {
+  provider: string
+  model: string
+  variant?: string
+}
+
+interface IVoicePreferences {
+  backend: TVoiceBackend
+  routes: Record<TVoiceBackend, IVoiceRouteProfile>
+  stt: {
+    provider: TVoiceSttProvider
+    model: string
+    language: string
+  }
+}
+
+const DEFAULT_VOICE_PREFERENCES: IVoicePreferences = {
+  backend: "oauth",
+  routes: {
+    oauth: { provider: "openai", model: "gpt-5.6-luna", variant: "max" },
+    agy: { provider: "antigravity", model: "gemini-3.8-flash-medium" },
+    codex: { provider: "codex-app-server", model: "gpt-5.6-luna", variant: "max" },
+  },
+  stt: { provider: "faster-whisper", model: "small", language: "es" },
+}
 
 //Config
 const run = promisify(execFile)
@@ -61,8 +88,24 @@ interface ILiveVoiceState {
   fallbackAgent: "agy" | "codex" | null
   fallbackHistory: Array<{ role: "user" | "assistant"; text: string }>
   acpChild: ChildProcess | null
+  acpClient: IAcpClient | null
   startedAt: number
   clockTimer: ReturnType<typeof setInterval> | null
+}
+
+interface IAcpClient {
+  agent: "agy" | "codex"
+  child: ChildProcess
+  buffer: string
+  stderr: string
+  requestID: number
+  pending: Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>
+  responseText: string
+  turnCompletion: Promise<void> | null
+  finishTurn: (() => void) | null
+  failTurn: ((error: Error) => void) | null
+  sessionID: string | null
+  threadID: string | null
 }
 
 interface ILiveStatusView {
@@ -105,51 +148,155 @@ const state: IVoiceState = {
     fallbackAgent: null,
     fallbackHistory: [],
     acpChild: null,
+    acpClient: null,
     startedAt: 0,
     clockTimer: null,
   },
 }
 
-let persistVoiceBackend: (backend: TVoiceBackend) => Promise<void> = async () => {}
+let voicePreferences: IVoicePreferences = structuredClone(DEFAULT_VOICE_PREFERENCES)
+let persistVoicePreferences: (preferences: IVoicePreferences) => Promise<void> = async () => {}
 let updateLiveStatusView: (view: ILiveStatusView) => void = () => {}
 
 /** Devuelve la etiqueta visible para la ruta principal de voz. */
 function voiceBackendLabel(backend: TVoiceBackend): string {
   if (backend === "agy") return "AGY ACP"
-  if (backend === "codex") return "Codex ACP"
+  if (backend === "codex") return "Codex app-server"
   return "ChatGPT OAuth"
 }
 
-/** Permite cambiar la ruta primaria de Live y la persiste entre sesiones. */
-async function configureVoiceBackend(context: any): Promise<void> {
+function cloneVoicePreferences(): IVoicePreferences {
+  return JSON.parse(JSON.stringify(voicePreferences)) as IVoicePreferences
+}
+
+/** Configura la ruta con la jerarquía Motor -> Provider -> Modelo -> Variante. */
+async function configureVoiceRoute(context: any): Promise<void> {
   const backend = await context.ui.dialog.select({
-    title: "Ruta de respuestas de voz",
+    title: "Motor de respuestas de voz",
     current: state.voiceBackend,
     options: [
-      {
-        title: "ChatGPT OAuth",
-        value: "oauth",
-        description: "Usa tu cuenta de ChatGPT; AGY ACP y Codex ACP quedan como fallbacks.",
-      },
-      {
-        title: "AGY ACP",
-        value: "agy",
-        description: "Usa la sesión de Antigravity; Codex ACP queda como fallback.",
-      },
-      {
-        title: "Codex ACP",
-        value: "codex",
-        description: "Usa el login de Codex; AGY ACP queda como fallback.",
-      },
+      { title: "ChatGPT OAuth", value: "oauth", description: "Cuenta de ChatGPT mediante OpenCode OAuth." },
+      { title: "AGY ACP", value: "agy", description: "Sesión persistente de Antigravity ACP." },
+      { title: "Codex app-server", value: "codex", description: "Codex oficial por JSON-RPC; no usa codex-acp." },
     ],
   }) as TVoiceBackend | undefined
+  if (!backend) return
 
-  if (!backend || backend === state.voiceBackend) return
+  const providers: Record<TVoiceBackend, Array<{ title: string; value: string; description: string }>> = {
+    oauth: [{ title: "OpenAI ChatGPT OAuth", value: "openai", description: "Usa la sesión OAuth guardada en OpenCode." }],
+    agy: [{ title: "Antigravity ACP", value: "antigravity", description: "Usa el transporte ACP de agy." }],
+    codex: [{ title: "Codex app-server", value: "codex-app-server", description: "Usa initialize/thread/start/turn/start." }],
+  }
+  const provider = await context.ui.dialog.select({
+    title: `${voiceBackendLabel(backend)} · Provider`,
+    current: voicePreferences.routes[backend].provider,
+    options: providers[backend],
+  }) as string | undefined
+  if (!provider) return
 
+  const modelOptions: Record<TVoiceBackend, Array<{ title: string; value: string }>> = {
+    oauth: [
+      { title: "GPT-5.6 Luna", value: "gpt-5.6-luna" },
+      { title: "GPT-5.6 Sol", value: "gpt-5.6-sol" },
+      { title: "GPT-6 Luna", value: "gpt-6-luna" },
+    ],
+    agy: [
+      { title: "Gemini 3.8 Flash Medium", value: "gemini-3.8-flash-medium" },
+      { title: "Gemini 3.8 Flash High", value: "gemini-3.8-flash-high" },
+      { title: "Claude Sonnet 4.6", value: "claude-sonnet-4-6" },
+      { title: "Claude Opus 4.6 Thinking", value: "claude-opus-4-6-thinking" },
+      { title: "GPT-OSS 120B Medium", value: "gpt-oss-120b-medium" },
+    ],
+    codex: [
+      { title: "GPT-5.6 Luna", value: "gpt-5.6-luna" },
+      { title: "GPT-6 Luna", value: "gpt-6-luna" },
+    ],
+  }
+  const model = await context.ui.dialog.select({
+    title: `${voiceBackendLabel(backend)} · Modelo`,
+    current: voicePreferences.routes[backend].model,
+    options: modelOptions[backend],
+  }) as string | undefined
+  if (!model) return
+
+  let variant: string | undefined
+  if (backend !== "agy") {
+    variant = await context.ui.dialog.select({
+      title: `${voiceBackendLabel(backend)} · Variante`,
+      current: voicePreferences.routes[backend].variant ?? "max",
+      options: ["max", "xhigh", "high", "medium", "low", "none"].map((value) => ({ title: value, value })),
+    }) as string | undefined
+    if (!variant) return
+  }
+
+  const next = cloneVoicePreferences()
+  next.backend = backend
+  next.routes[backend] = { provider, model, ...(variant ? { variant } : {}) }
+  voicePreferences = next
   state.voiceBackend = backend
-  await persistVoiceBackend(backend)
+  await persistVoicePreferences(next)
   const active = state.live.active ? " Se aplicará al iniciar Live de nuevo." : ""
-  toast(context, `Ruta de voz: ${voiceBackendLabel(backend)}.${active}`, "success", "Voz", 5000)
+  toast(
+    context,
+    `${voiceBackendLabel(backend)} · ${provider} · ${model}${variant ? ` · ${variant}` : ""}.${active}`,
+    "success",
+    "Voz",
+    6000,
+  )
+}
+
+/** Configura provider, modelo e idioma del reconocimiento de voz. */
+async function configureVoiceStt(context: any): Promise<void> {
+  const provider = await context.ui.dialog.select({
+    title: "Transcripción · Provider",
+    current: voicePreferences.stt.provider,
+    options: [
+      { title: "faster-whisper local", value: "faster-whisper", description: "Whisper local; sin API key." },
+      { title: "Windows SAPI", value: "windows", description: "Reconocedor incluido en Windows." },
+      { title: "OpenAI API", value: "openai", description: "Requiere OPENAI_API_KEY." },
+      { title: "Gemini API", value: "gemini", description: "Requiere GOOGLE_API_KEY o GEMINI_API_KEY." },
+    ],
+  }) as TVoiceSttProvider | undefined
+  if (!provider) return
+
+  const modelOptions: Record<TVoiceSttProvider, Array<{ title: string; value: string }>> = {
+    "faster-whisper": [
+      { title: "Whisper small", value: "small" },
+      { title: "Whisper medium", value: "medium" },
+      { title: "Whisper large-v3", value: "large-v3" },
+    ],
+    windows: [{ title: "System.Speech local", value: "local" }],
+    openai: [
+      { title: "gpt-4o-mini-transcribe", value: "gpt-4o-mini-transcribe" },
+      { title: "gpt-4o-transcribe", value: "gpt-4o-transcribe" },
+    ],
+    gemini: [{ title: "Gemini 2.5 Flash", value: "gemini-2.5-flash" }],
+  }
+  const model = await context.ui.dialog.select({
+    title: `${provider} · Modelo STT`,
+    current: voicePreferences.stt.model,
+    options: modelOptions[provider],
+  }) as string | undefined
+  if (!model) return
+
+  const next = cloneVoicePreferences()
+  next.stt = { provider, model, language: next.stt.language || "es" }
+  voicePreferences = next
+  await persistVoicePreferences(next)
+  toast(context, `STT: ${provider} · ${model} · idioma ${next.stt.language}`, "success", "Voz", 5000)
+}
+
+/** Abre el selector de ruta o el selector de STT. */
+async function configureVoiceBackend(context: any): Promise<void> {
+  const area = await context.ui.dialog.select({
+    title: "Configuración de voz",
+    options: [
+      { title: "Ruta de respuestas", value: "route", description: "Motor -> Provider -> Modelo -> Variante." },
+      { title: "Transcripción STT", value: "stt", description: "Provider -> Modelo -> idioma." },
+    ],
+  }) as "route" | "stt" | undefined
+  if (area === "route") await configureVoiceRoute(context)
+  if (area === "stt") await configureVoiceStt(context)
 }
 
 //AudioTools
@@ -385,11 +532,30 @@ function resolveVoiceCommand(commandArgs: string[]): IVoiceCommand | null {
   return { executable: binary, args: commandArgs }
 }
 
+/** Inyecta la configuración STT persistida en cada proceso de captura. */
+function voiceEnvironment(): NodeJS.ProcessEnv {
+  const stt = voicePreferences.stt
+  const environment: NodeJS.ProcessEnv = {
+    ...AUDIO_ENV,
+    VOICE_PROVIDER: stt.provider,
+    VOICE_MODEL: stt.model,
+    VOICE_LANGUAGE: stt.language,
+  }
+  if (IS_WINDOWS) {
+    delete environment.VOICE_DEVICE
+    const ffmpeg = findFfmpeg()
+    const device = ffmpeg ? findWindowsAudioDevice(ffmpeg) : null
+    if (device) environment.VOICE_DEVICE = device
+  }
+  return environment
+}
+
 /** Ejecuta el transcriptor como proceso hijo compatible con Windows. */
 function spawnVoice(commandArgs: string[], options: Parameters<typeof spawn>[2]): ChildProcess {
   const voice = resolveVoiceCommand(commandArgs)
   if (!voice) throw new Error("Falta ~/.local/bin/opencode-voice")
-  return spawn(voice.executable, voice.args, IS_WINDOWS ? { ...options, windowsHide: true } : options)
+  const merged = { ...options, env: { ...voiceEnvironment(), ...(options?.env ?? {}) } }
+  return spawn(voice.executable, voice.args, IS_WINDOWS ? { ...merged, windowsHide: true } : merged)
 }
 
 /** Ejecuta el transcriptor y recoge su salida estándar. */
@@ -399,7 +565,7 @@ function runVoice(commandArgs: string[], options: Parameters<typeof execFile>[2]
   return run(
     voice.executable,
     voice.args,
-    IS_WINDOWS ? { ...options, windowsHide: true } : options,
+    IS_WINDOWS ? { ...options, env: { ...voiceEnvironment(), ...(options?.env ?? {}) }, windowsHide: true } : { ...options, env: { ...voiceEnvironment(), ...(options?.env ?? {}) } },
   ) as Promise<{ stdout: string; stderr: string }>
 }
 
@@ -452,6 +618,13 @@ function toast(
   } catch {}
 }
 
+/** Escribe trazas de voz en el log de OpenCode sin incluir audio crudo. */
+function voiceLog(event: string, details: Record<string, unknown> = {}): void {
+  try {
+    console.info(`[voice] ${JSON.stringify({ event, at: new Date().toISOString(), ...details })}`)
+  } catch {}
+}
+
 //Session
 /** Devuelve el ID de sesión cuando OpenCode está mostrando una conversación. */
 function getSessionID(context: any): string | null {
@@ -470,7 +643,7 @@ async function submitTranscript(context: any, text: string, targetSessionID: str
   await client.session.prompt({ sessionID: targetSessionID, text })
 }
 
-/** Selecciona el modelo OAuth de OpenAI disponible con menor latencia para Live. */
+/** Selecciona el modelo OAuth configurado para Live; nunca elige un modelo Fast implícito. */
 async function selectLiveOpenAIModel(context: any, sessionID: string): Promise<void> {
   const client = context?.client
   if (!client?.session?.get || !client?.session?.switchModel || !client?.model?.list || !client?.integration?.list) {
@@ -496,12 +669,10 @@ async function selectLiveOpenAIModel(context: any, sessionID: string): Promise<v
   const candidates = Array.isArray(availableModels)
     ? availableModels.filter((model: any) => model?.providerID === "openai" && model?.type === "chat")
     : []
-  const preferred = process.env.OPENCODE_VOICE_MODEL
+  const configured = voicePreferences.routes.oauth
+  const preferred = process.env.OPENCODE_VOICE_MODEL ?? configured.model
   const model = candidates.find((candidate: any) => candidate.id === preferred)
-    ?? candidates.find((candidate: any) => candidate.id === "gpt-6.1-sol-fast")
-    ?? candidates.find((candidate: any) => candidate.id.endsWith("-fast"))
-    ?? candidates.find((candidate: any) => candidate.id === "gpt-6.1-sol")
-    ?? candidates[0]
+    ?? candidates.find((candidate: any) => candidate.id === "gpt-5.6-luna")
 
   if (!model) throw new Error("No hay modelos ChatGPT disponibles en el catálogo OAuth de OpenAI")
 
@@ -509,11 +680,17 @@ async function selectLiveOpenAIModel(context: any, sessionID: string): Promise<v
     id: currentModel?.id,
     providerID: currentModel?.providerID,
     variant: currentModel?.variant,
-    selected: { id: model.id, providerID: model.providerID },
+    selected: { id: model.id, providerID: model.providerID, variant: configured.variant ?? "max" },
   })
   await client.session.switchModel({
     sessionID,
-    model: { id: model.id, providerID: model.providerID },
+    model: { id: model.id, providerID: model.providerID, variant: configured.variant ?? "max" },
+  })
+  voiceLog("oauth_model_selected", {
+    sessionID,
+    provider: model.providerID,
+    model: model.id,
+    variant: configured.variant ?? "max",
   })
 }
 
@@ -706,11 +883,14 @@ async function cancelRecording(context: any): Promise<void> {
 //LiveConversation
 /** Publica al TUI el estado efímero que muestra la franja Live. */
 function publishLiveStatus(): void {
+  const profile = voicePreferences.routes[state.live.voiceBackend]
   updateLiveStatusView({
     active: state.live.active,
     muted: state.live.muted,
     phase: state.live.phase,
-    route: state.live.fallbackAgent ? `${state.live.fallbackAgent.toUpperCase()} ACP` : voiceBackendLabel(state.live.voiceBackend),
+    route: state.live.fallbackAgent
+      ? state.live.fallbackAgent === "agy" ? "AGY ACP" : "Codex app-server"
+      : `${voiceBackendLabel(state.live.voiceBackend)} · ${profile.model}${profile.variant ? `/${profile.variant}` : ""}`,
     startedAt: state.live.startedAt,
     updatedAt: Date.now(),
   })
@@ -852,6 +1032,14 @@ async function handleLiveTranscript(
   if (!live.active || live.listener !== child || live.sessionID !== sessionID) return
 
   state.lastText = text
+  voiceLog("transcript", {
+    route: live.voiceBackend,
+    provider: voicePreferences.stt.provider,
+    model: voicePreferences.stt.model,
+    language: voicePreferences.stt.language,
+    chars: text.length,
+    ...(process.env.VOICE_DEBUG ? { text } : {}),
+  })
   live.listener = null
   live.listenerBuffer = ""
 
@@ -1130,127 +1318,235 @@ function rememberLiveExchange(userText: string, assistantText: string): void {
   if (history.length > 12) history.splice(0, history.length - 12)
 }
 
-/** Ejecuta una ronda de voz con AGY ACP o Codex ACP manteniendo el historial Live. */
-async function runAcpVoiceTurn(
-  agent: "agy" | "codex",
-  text: string,
-  history: Array<{ role: "user" | "assistant"; text: string }>,
-): Promise<string> {
-  const executable = resolveExecutable(agent === "agy" ? "agy" : "codex-acp")
-  if (!executable) throw new Error(`No encuentro el ejecutable ${agent === "agy" ? "agy" : "codex-acp"}`)
+function acpExecutable(agent: "agy" | "codex"): string | null {
+  return resolveExecutable(agent === "agy" ? "agy" : "codex")
+}
+
+function acpArgs(agent: "agy" | "codex"): string[] {
+  return agent === "agy" ? ["acp"] : ["app-server", "--listen", "stdio://"]
+}
+
+function sendAcpNotification(client: IAcpClient, method: string, params: Record<string, unknown>): void {
+  client.child.stdin?.write(`${JSON.stringify({ jsonrpc: "2.0", method, params })}\n`)
+}
+
+function rejectAcpClient(client: IAcpClient, error: Error): void {
+  for (const waiting of client.pending.values()) {
+    clearTimeout(waiting.timer)
+    waiting.reject(error)
+  }
+  client.pending.clear()
+  client.failTurn?.(error)
+  client.failTurn = null
+  client.finishTurn = null
+}
+
+function handleAcpMessage(client: IAcpClient, message: any): void {
+  if (client.agent === "agy" && message?.method === "session/update") {
+    const update = message.params?.update
+    if (update?.sessionUpdate === "agent_message_chunk" && update.content?.type === "text") {
+      client.responseText += update.content.text ?? ""
+    }
+  }
+  if (client.agent === "codex" && message?.method === "item/agentMessage/delta") {
+    client.responseText += message.params?.delta ?? message.params?.text ?? ""
+  }
+  if (client.agent === "codex" && message?.method === "turn/completed") {
+    const status = message.params?.turn?.status
+    if (status === "completed") client.finishTurn?.()
+    else client.failTurn?.(new Error(`Codex turn terminó con estado ${status ?? "desconocido"}`))
+    client.finishTurn = null
+    client.failTurn = null
+  }
+
+  const waiting = client.pending.get(message?.id)
+  if (!waiting) return
+  clearTimeout(waiting.timer)
+  client.pending.delete(message.id)
+  if (message.error) waiting.reject(new Error(message.error.message ?? `${client.agent} falló`))
+  else waiting.resolve(message.result)
+}
+
+function acpRequest(client: IAcpClient, method: string, params: Record<string, unknown>, timeoutMs = 10000): Promise<any> {
+  const id = ++client.requestID
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      client.pending.delete(id)
+      reject(new Error(`${client.agent} agotó el tiempo en ${method}`))
+    }, timeoutMs)
+    client.pending.set(id, { resolve, reject, timer })
+    client.child.stdin?.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`)
+  })
+}
+
+async function createAcpClient(agent: "agy" | "codex"): Promise<IAcpClient> {
+  const executable = acpExecutable(agent)
+  if (!executable) throw new Error(`No encuentro el ejecutable ${agent === "agy" ? "agy" : "codex app-server"}`)
 
   const acpEnv: NodeJS.ProcessEnv = { ...process.env }
   delete acpEnv.OPENAI_API_KEY
   delete acpEnv.GOOGLE_API_KEY
   delete acpEnv.GEMINI_API_KEY
-  const child = spawn(executable, agent === "agy" ? ["acp"] : ["--message-streaming"], {
+  const child = spawn(executable, acpArgs(agent), {
     cwd: state.live.context?.directory ?? process.cwd(),
     env: acpEnv,
     stdio: ["pipe", "pipe", "pipe"],
+    windowsHide: IS_WINDOWS,
   })
-  state.live.acpChild = child
-  let buffer = ""
-  let stderr = ""
-  let responseText = ""
-  let requestID = 0
-  const pending = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> }>()
-
-  /** Envía una petición JSON-RPC y espera su respuesta correlacionada. */
-  const request = (method: string, params: Record<string, unknown>, timeoutMs = 10000): Promise<any> => {
-    const id = ++requestID
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        pending.delete(id)
-        reject(new Error(`${agent} ACP agotó el tiempo en ${method}`))
-      }, timeoutMs)
-      pending.set(id, { resolve, reject, timer })
-      child.stdin?.write(`${JSON.stringify({ jsonrpc: "2.0", id, method, params })}\n`)
-    })
+  const client: IAcpClient = {
+    agent,
+    child,
+    buffer: "",
+    stderr: "",
+    requestID: 0,
+    pending: new Map(),
+    responseText: "",
+    turnCompletion: null,
+    finishTurn: null,
+    failTurn: null,
+    sessionID: null,
+    threadID: null,
   }
+  state.live.acpChild = child
+  state.live.acpClient = client
+  voiceLog("transport_start", {
+    route: agent,
+    transport: agent === "agy" ? "acp" : "app-server",
+    model: voicePreferences.routes[agent].model,
+    variant: voicePreferences.routes[agent].variant,
+  })
 
   child.stdout?.on("data", (chunk: Buffer) => {
-    buffer += chunk.toString()
-    const lines = buffer.split("\n")
-    buffer = lines.pop() ?? ""
+    client.buffer += chunk.toString()
+    const lines = client.buffer.split("\n")
+    client.buffer = lines.pop() ?? ""
     for (const line of lines) {
+      if (!line.trim()) continue
       try {
-        const message = JSON.parse(line)
-        if (message?.method === "session/update") {
-          const update = message.params?.update
-          if (update?.sessionUpdate === "agent_message_chunk" && update.content?.type === "text") {
-            responseText += update.content.text ?? ""
-          }
-        }
-        const waiting = pending.get(message?.id)
-        if (!waiting) continue
-        clearTimeout(waiting.timer)
-        pending.delete(message.id)
-        if (message.error) waiting.reject(new Error(message.error.message ?? `${agent} ACP falló`))
-        else waiting.resolve(message.result)
+        handleAcpMessage(client, JSON.parse(line))
       } catch {}
     }
   })
   child.stderr?.on("data", (chunk: Buffer) => {
-    stderr = `${stderr}${chunk.toString()}`.slice(-2000)
+    client.stderr = `${client.stderr}${chunk.toString()}`.slice(-3000)
   })
-  child.on("error", (error) => {
-    for (const waiting of pending.values()) {
-      clearTimeout(waiting.timer)
-      waiting.reject(error)
-    }
-    pending.clear()
-  })
-  child.on("close", (code) => {
-    const error = new Error(stderr.trim() || `${agent} ACP terminó con code=${code}`)
-    for (const waiting of pending.values()) {
-      clearTimeout(waiting.timer)
-      waiting.reject(error)
-    }
-    pending.clear()
-  })
+  child.on("error", (error) => rejectAcpClient(client, error))
+  child.on("close", (code) => rejectAcpClient(client, new Error(client.stderr.trim() || `${agent} terminó con code=${code}`)))
 
   try {
-    await request("initialize", {
+    await acpRequest(client, "initialize", {
       protocolVersion: 1,
       clientCapabilities: {},
-      clientInfo: { name: "opencode-voice", version: "0.2.0" },
+      clientInfo: { name: "opencode-voice", version: "0.4.0" },
     })
-    const session = await request("session/new", { cwd: state.live.context?.directory ?? process.cwd(), mcpServers: [] })
-    const conversation = [
-      ...history.slice(-12).map((turn) => `${turn.role === "user" ? "Usuario" : agent === "agy" ? "AGY" : "Codex"}: ${turn.text}`),
-      `Usuario: ${text}`,
-    ].join("\n\n")
-    await request("session/prompt", {
-      sessionId: session.sessionId,
-      prompt: [{ type: "text", text: `Responde de forma conversacional, breve y en español. No uses herramientas.\n\n${conversation}` }],
-    }, 90000)
-    const result = responseText.trim()
-    if (!result) throw new Error(`${agent} ACP terminó sin devolver texto${stderr ? `: ${stderr.trim()}` : ""}`)
-    return result
-  } finally {
-    for (const waiting of pending.values()) clearTimeout(waiting.timer)
-    pending.clear()
+    sendAcpNotification(client, "initialized", {})
+    if (agent === "agy") {
+      const profile = voicePreferences.routes.agy
+      const session = await acpRequest(client, "session/new", {
+        cwd: state.live.context?.directory ?? process.cwd(),
+        mcpServers: [],
+      })
+      client.sessionID = session.sessionId
+      const geminiMatch = profile.model.match(/^gemini-3\.8-flash-(high|medium|low)$/)
+      const modelValue = geminiMatch ? "gemini-3.8-flash" : profile.model
+      await acpRequest(client, "session/set_config_option", {
+        sessionId: client.sessionID,
+        configId: "model",
+        value: modelValue,
+      })
+      if (geminiMatch) {
+        await acpRequest(client, "session/set_config_option", {
+          sessionId: client.sessionID,
+          configId: "thought_level",
+          value: geminiMatch[1],
+        })
+      }
+      voiceLog("agy_session_started", { sessionID: client.sessionID, model: voicePreferences.routes.agy.model })
+    } else {
+      const profile = voicePreferences.routes.codex
+      const thread = await acpRequest(client, "thread/start", {
+        cwd: state.live.context?.directory ?? process.cwd(),
+        model: profile.model,
+        approvalPolicy: "never",
+        sandbox: "read-only",
+      })
+      client.threadID = thread?.thread?.id ?? thread?.threadId ?? null
+      if (!client.threadID) throw new Error("Codex app-server no devolvió thread.id")
+      voiceLog("codex_thread_started", { threadID: client.threadID, model: profile.model, variant: profile.variant })
+    }
+    return client
+  } catch (error) {
     child.kill("SIGTERM")
+    if (state.live.acpClient === client) state.live.acpClient = null
     if (state.live.acpChild === child) state.live.acpChild = null
+    throw error
   }
 }
 
-/** Recurre a AGY ACP y después a Codex ACP cuando ChatGPT OAuth no responde. */
+async function closeAcpClient(): Promise<void> {
+  const client = state.live.acpClient
+  state.live.acpClient = null
+  state.live.acpChild = null
+  if (!client) return
+  rejectAcpClient(client, new Error("Live detenido"))
+  await stopRecorder(client.child, "SIGTERM")
+}
+
+/** Ejecuta múltiples turnos en una sola sesión ACP/app-server durante F4. */
+async function runAcpVoiceTurn(agent: "agy" | "codex", text: string): Promise<string> {
+  let client = state.live.acpClient
+  if (!client || client.agent !== agent) {
+    if (client) await closeAcpClient()
+    client = await createAcpClient(agent)
+  }
+  client.responseText = ""
+  if (agent === "agy") {
+    await acpRequest(client, "session/prompt", {
+      sessionId: client.sessionID,
+      prompt: [{ type: "text", text: `Responde de forma conversacional, breve y en español. No uses herramientas.\n\n${text}` }],
+    }, 90000)
+  } else {
+    client.turnCompletion = new Promise<void>((resolve, reject) => {
+      client!.finishTurn = resolve
+      client!.failTurn = reject
+    })
+    await acpRequest(client, "turn/start", {
+      threadId: client.threadID,
+      input: [{ type: "text", text }],
+      effort: voicePreferences.routes.codex.variant ?? "max",
+    }, 15000)
+    await client.turnCompletion
+    client.turnCompletion = null
+  }
+  const result = client.responseText.trim()
+  voiceLog("response_completed", {
+    route: agent,
+    sessionID: client.sessionID,
+    threadID: client.threadID,
+    chars: result.length,
+  })
+  if (!result) throw new Error(`${agent} terminó sin devolver texto${client.stderr ? `: ${client.stderr.trim()}` : ""}`)
+  return result
+}
+
+/** Ejecuta la ruta ACP/app-server seleccionada y mantiene fallback explícito. */
 async function speakAcpFallback(context: any, text: string): Promise<void> {
   const live = state.live
   const preferredAgent = live.fallbackAgent
     ?? (live.voiceBackend === "codex" ? "codex" : "agy")
-  const agents: Array<"agy" | "codex"> = preferredAgent === "codex"
-    ? ["codex", "agy"]
-    : ["agy", "codex"]
+  const allowFallback = process.env.OPENCODE_VOICE_ALLOW_FALLBACK === "1"
+  const agents: Array<"agy" | "codex"> = allowFallback
+    ? preferredAgent === "codex" ? ["codex", "agy"] : ["agy", "codex"]
+    : [preferredAgent]
   let lastError: Error | null = null
 
   for (const agent of agents) {
     let response: string
     try {
-      response = await runAcpVoiceTurn(agent, text, live.fallbackHistory)
+      response = await runAcpVoiceTurn(agent, text)
     } catch (error) {
       lastError = error as Error
+      await closeAcpClient()
       if (!live.active) return
       continue
     }
@@ -1260,7 +1556,7 @@ async function speakAcpFallback(context: any, text: string): Promise<void> {
     rememberLiveExchange(text, response)
     live.phase = "speaking"
     publishLiveStatus()
-    toast(context, `Live responde con ${agent.toUpperCase()} ACP`, "info", "Voz", 3500)
+    toast(context, `Live responde con ${agent === "agy" ? "AGY ACP" : "Codex app-server"}`, "info", "Voz", 3500)
     await speakAssistantResponse(response)
     return
   }
@@ -1309,6 +1605,22 @@ async function startLive(context: any): Promise<void> {
   live.sessionID = sessionID
   live.context = context
   live.voiceBackend = state.voiceBackend
+  const selectedProfile = voicePreferences.routes[live.voiceBackend]
+  voiceLog("live_start", {
+    route: live.voiceBackend,
+    provider: selectedProfile.provider,
+    model: selectedProfile.model,
+    variant: selectedProfile.variant,
+    sttProvider: voicePreferences.stt.provider,
+    sttModel: voicePreferences.stt.model,
+  })
+  toast(
+    context,
+    `${voiceBackendLabel(live.voiceBackend)} · ${selectedProfile.provider} · ${selectedProfile.model}${selectedProfile.variant ? ` · ${selectedProfile.variant}` : ""}; STT ${voicePreferences.stt.provider}/${voicePreferences.stt.model}`,
+    "info",
+    "Live",
+    5000,
+  )
   if (live.voiceBackend === "oauth") {
     const modelSelection = selectLiveOpenAIModel(context, sessionID)
     live.modelSelection = modelSelection
@@ -1325,22 +1637,24 @@ async function startLive(context: any): Promise<void> {
         return
       }
 
-      startupFallbackAgent = resolveExecutable("agy")
-        ? "agy"
-        : resolveExecutable("codex-acp")
-          ? "codex"
-          : null
+      if (process.env.OPENCODE_VOICE_ALLOW_FALLBACK === "1") {
+        startupFallbackAgent = resolveExecutable("agy")
+          ? "agy"
+          : resolveExecutable("codex")
+            ? "codex"
+            : null
+      }
       if (!startupFallbackAgent) {
         live.starting = false
         live.sessionID = null
         live.modelSelection = null
         live.context = null
-        toast(context, `No pude activar ChatGPT OAuth ni encontrar AGY/Codex ACP: ${(error as Error).message}`, "error", "Live", 7000)
+        toast(context, `ChatGPT OAuth no pudo activarse y el fallback está deshabilitado: ${(error as Error).message}`, "error", "Live", 7000)
         return
       }
       toast(
         context,
-        `ChatGPT OAuth no pudo activarse (${(error as Error).message}); Live usará ${startupFallbackAgent.toUpperCase()} ACP`,
+        `ChatGPT OAuth no pudo activarse (${(error as Error).message}); Live usará ${startupFallbackAgent === "agy" ? "AGY ACP" : "Codex app-server"}`,
         "warning",
         "Live",
         8000,
@@ -1369,6 +1683,7 @@ async function startLive(context: any): Promise<void> {
   live.fallbackAgent = startupFallbackAgent
   live.fallbackHistory = []
   live.acpChild = null
+  live.acpClient = null
   live.startedAt = Date.now()
   live.clockTimer = setInterval(publishLiveStatus, 1000)
   publishLiveStatus()
@@ -1379,11 +1694,13 @@ async function startLive(context: any): Promise<void> {
 async function stopLive(): Promise<void> {
   const live = state.live
   const sessionID = live.sessionID
+  voiceLog("live_stop", { route: live.voiceBackend, sessionID })
   const modelSelection = live.modelSelection
   const listener = live.listener
   const speaker = live.speaker
   const speakerPlayer = live.speakerPlayer
   const acpChild = live.acpChild
+  const acpClient = live.acpClient
 
   live.active = false
   live.starting = false
@@ -1406,13 +1723,14 @@ async function stopLive(): Promise<void> {
     listener ? stopRecorder(listener) : Promise.resolve(),
     speaker ? stopRecorder(speaker, "SIGTERM") : Promise.resolve(),
     speakerPlayer ? stopRecorder(speakerPlayer, "SIGTERM") : Promise.resolve(),
-    acpChild ? stopRecorder(acpChild, "SIGTERM") : Promise.resolve(),
+    acpClient ? closeAcpClient() : acpChild ? stopRecorder(acpChild, "SIGTERM") : Promise.resolve(),
     modelSelection ? modelSelection.catch(() => {}) : Promise.resolve(),
   ])
   if (sessionID) await restoreLiveModel(sessionID)
   live.context = null
   live.fallbackAgent = null
   live.fallbackHistory = []
+  live.acpClient = null
 
 }
 
@@ -1445,14 +1763,20 @@ export default Plugin.define({
   async setup(context) {
     if (!context?.keymap?.layer) return
 
-    const [voicePreferences, updateVoicePreferences] = context.storage.store("voice-preferences", {
-      initial: { backend: "oauth" as TVoiceBackend },
+    const [savedPreferences, updateVoicePreferences] = context.storage.store("voice-preferences", {
+      initial: structuredClone(DEFAULT_VOICE_PREFERENCES),
     })
-    const savedBackend = voicePreferences.backend
-    state.voiceBackend = savedBackend === "agy" || savedBackend === "codex" ? savedBackend : "oauth"
-    persistVoiceBackend = async (backend) => {
+    const saved = savedPreferences as Partial<IVoicePreferences>
+    voicePreferences = {
+      ...structuredClone(DEFAULT_VOICE_PREFERENCES),
+      ...saved,
+      routes: { ...DEFAULT_VOICE_PREFERENCES.routes, ...(saved.routes ?? {}) },
+      stt: { ...DEFAULT_VOICE_PREFERENCES.stt, ...(saved.stt ?? {}) },
+    }
+    state.voiceBackend = voicePreferences.backend
+    persistVoicePreferences = async (preferences) => {
       await updateVoicePreferences((draft) => {
-        draft.backend = backend
+        Object.assign(draft, preferences)
       })
     }
 

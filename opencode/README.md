@@ -7,7 +7,7 @@ Configuración V2 para Windows, alineada con `dotfiles-dizzi/opencode/.config/op
 - **Engram**: `plugins/engram.ts` conserva los hooks de sesión en formato V2 (`default` con `id` y `setup`). Usa el ejecutable `%USERPROFILE%\bin\engram.exe`; configura `ENGRAM_BIN` para que el plugin también pueda iniciar el servicio HTTP.
 - **Engram MCP**: está en `mcp.servers.engram` y habilitado cuando el binario existe. Usa `engram.exe mcp --tools=agent`.
 - **OpenCode Discord RPC**: `C:\Users\Administrator\workspace\opencode-discord-rpc`. El plugin soporta V2 mediante `id`/`setup` y mantiene `server()` para compatibilidad V1. El paquete carga `dist/index.js`.
-- **Voz (dictado y Live)**: `plugins/voice` es un plugin TUI basado en la rama `main` de `dotfiles-dizzi` con adaptador nativo para Windows (FFmpeg/DirectShow + SAPI). Se registra en `cli.json`, no en `plugins` de `opencode.json`.
+- **Voz (dictado y Live)**: `plugins/voice` es un plugin TUI basado en la rama `main` de `dotfiles-dizzi` con adaptador nativo para Windows (FFmpeg/DirectShow + faster-whisper/SAPI). Se registra en `cli.json`, no en `plugins` de `opencode.json`.
 - **TodoWrite**: `commands/todowrite.md` registra el comando `/todowrite`; requiere `experimental.todo: true` en `opencode.json`.
 - **Atajos**: `Ctrl+X` y luego `1`, `2` o `3` selecciona las pestañas 1–3 en Windows; el chord funciona sin depender de cómo el emulador envía `Ctrl+1`.
 
@@ -28,7 +28,7 @@ Requisitos:
 
 1. **FFmpeg** con DirectShow (instalado con `winget install Gyan.FFmpeg`). El plugin y el transcriptor lo buscan en `PATH`, aceptan `FFMPEG_PATH` y tienen fallback al alias estándar de WinGet si OpenCode conserva un `PATH` anterior.
 2. **Micrófono DirectShow**. El plugin elige el primero que parece físico y evita cámaras virtuales como Iriun u OBS. Para forzar otro dispositivo define `VOICE_DEVICE` con el nombre exacto que devuelve `opencode-voice devices`.
-3. **Transcripción Live/F5**: en Windows usa por defecto el reconocedor local `System.Speech` (`es-ES`), sin red, cuotas ni clave. Necesita el idioma de reconocimiento de Windows instalado. Para usar Gemini por API define `VOICE_PROVIDER=gemini` y `GOOGLE_API_KEY`/`GEMINI_API_KEY`; para OpenAI API define `VOICE_PROVIDER=openai` y `OPENAI_API_KEY`. Ambas API tienen límites y costes independientes de las suscripciones ChatGPT/Google AI.
+3. **Transcripción Live/F5**: `/voice-config` ofrece faster-whisper local (recomendado), Windows SAPI, OpenAI API y Gemini API. faster-whisper usa Whisper local (`small` por defecto), intenta CUDA y cae a CPU `int8`; no usa cuota ni API key. Instálalo con `py -3.12 -m pip install -r .\scripts\requirements-voice.txt`. SAPI queda disponible como fallback explícito.
 4. **TTS**: usa `System.Speech` de PowerShell (`SAPI`), incluido en Windows. No requiere eSpeak.
 5. **Transcriptor**: `scripts/opencode-voice.mjs`, copiado a `%USERPROFILE%\.local\bin\opencode-voice.mjs`, y Node.js disponible en `PATH` (o indicado por `OPENCODE_VOICE_NODE`). El TUI debe invocar `node.exe`; `process.execPath` apunta a `opencode.exe` en la app empaquetada y no sirve para ejecutar el `.mjs`.
 
@@ -37,6 +37,8 @@ Instala el transcriptor y comprueba el audio:
 ```powershell
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.local\bin" | Out-Null
 Copy-Item .\scripts\opencode-voice.mjs "$env:USERPROFILE\.local\bin\opencode-voice.mjs" -Force
+Copy-Item .\scripts\voice-stt-faster-whisper.py "$env:USERPROFILE\.local\bin\voice-stt-faster-whisper.py" -Force
+py -3.12 -m pip install --user -r .\scripts\requirements-voice.txt
 node "$env:USERPROFILE\.local\bin\opencode-voice.mjs" devices
 node "$env:USERPROFILE\.local\bin\opencode-voice.mjs" doctor
 ```
@@ -60,10 +62,12 @@ Atajos del plugin:
 - `F5` (`/voice-ask`): dicta y envía la transcripción al chat.
 - `F6`: mute del micrófono durante Live.
 - `F7`: cuelga Live o cancela la grabación.
-- `F3` (`/voice-config`): elige ChatGPT OAuth, AGY ACP o Codex ACP como ruta de respuestas.
+- `F3` (`/voice-config`): configura `Ruta de respuestas` como Motor → Provider → Modelo → Variante, o `Transcripción STT` como Provider → Modelo. Las rutas son ChatGPT OAuth, AGY ACP y Codex app-server; Codex usa `codex app-server`, no `codex-acp`.
 - `Ctrl+X`, luego `V`: abre la lista de variantes del modelo (`low`, `high`, `max`, etc. según el modelo). Cambia el nivel de razonamiento, no el volumen ni la sensibilidad del micrófono.
 
-Live (`F4`) detecta una frase, la transcribe localmente, la envía al chat, reproduce la respuesta con SAPI y vuelve a escuchar. F5 solo dicta y envía texto, sin TTS. Para respuestas habladas por ChatGPT, inicia sesión OAuth con `opencode auth login openai` y elige **Sign in with ChatGPT**; el plugin usa ese login para las respuestas Live, no para el reconocimiento del audio.
+Live (`F4`) detecta una frase, la transcribe localmente, la envía al motor seleccionado, reproduce la respuesta con SAPI y vuelve a escuchar. OAuth reutiliza la sesión OpenCode; AGY reutiliza una sesión ACP durante todo Live; Codex reutiliza un `thread` de app-server. F5 solo dicta y envía texto, sin TTS. Para respuestas habladas por ChatGPT, inicia sesión OAuth con `opencode auth login openai` y elige **Sign in with ChatGPT**; el plugin usa ese login para las respuestas Live, no para el reconocimiento del audio.
+
+Los fallbacks no cambian de ruta silenciosamente. Para habilitar el fallback secundario de forma explícita define `OPENCODE_VOICE_ALLOW_FALLBACK=1`; de lo contrario Live informa el error del motor seleccionado y se detiene.
 
 ## Instalación y actualización
 
