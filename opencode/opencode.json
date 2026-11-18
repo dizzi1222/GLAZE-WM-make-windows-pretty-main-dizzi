@@ -13,15 +13,10 @@
       "engram": {
         "type": "local",
         "command": [
-          "powershell",
-          "-NoProfile",
-          "-NonInteractive",
-          "-WindowStyle",
-          "Hidden",
-          "-Command",
-          "& 'C:/Users/Administrator/bin/engram.exe' mcp --tools=agent"
-        ],
-        "disabled": false
+          "C:/Users/Administrator/bin/engram.exe",
+          "mcp",
+          "--tools=agent"
+        ]
       },
       "figma": {
         "type": "local",
@@ -29,16 +24,14 @@
           "figma-developer-mcp",
           "--figma-api-key={env:FIGMA_API_KEY}",
           "--stdio"
-        ],
-        "disabled": false
+        ]
       },
       "composio-connect": {
         "type": "remote",
         "url": "https://connect.composio.dev/mcp",
         "headers": {
           "x-api-key": "{env:COMPOSIO_API_KEY}"
-        },
-        "disabled": false
+        }
       },
       "webshare-uk": {
         "type": "local",
@@ -47,12 +40,14 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_UK",
           "WS_PORT_UK"
         ],
-        "disabled": true
+        "disabled": false
       },
       "webshare-es": {
         "type": "local",
@@ -61,12 +56,14 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_ES",
           "WS_PORT_ES"
         ],
-        "disabled": true
+        "disabled": false
       },
       "webshare-us": {
         "type": "local",
@@ -75,6 +72,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US",
@@ -89,6 +88,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_2",
@@ -103,6 +104,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_3",
@@ -117,6 +120,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_PL",
@@ -131,6 +136,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_4",
@@ -145,6 +152,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_5",
@@ -159,6 +168,8 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_6",
@@ -173,12 +184,14 @@
           "-NoProfile",
           "-ExecutionPolicy",
           "Bypass",
+          "-WindowStyle",
+          "Hidden",
           "-File",
           "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
           "WS_HOST_US_7",
           "WS_PORT_US_7"
         ],
-        "disabled": false
+        "disabled": true
       }
     }
   },

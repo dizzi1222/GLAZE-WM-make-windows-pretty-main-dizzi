@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "theme": {
+    "name": "tokyonight"
+  },
+  "keybinds": {
+    "leader": "ctrl+x",
+    "theme.switch": "<leader>t",
+    "variant.list": "<leader>v",
+    "session.tab.select.1": "<leader>1",
+    "session.tab.select.2": "<leader>2",
+    "session.tab.select.3": "<leader>3"
+  },
+  "diffs": {
+    "wrap": "word"
+  },
+  "session": {
+    "sidebar": "auto",
+    "scrollbar": false,
+    "thinking": "show"
+  },
+  "animations": true,
+  "plugins": [
+    {
+      "package": "C:/Users/Administrator/workspace/GLAZE-WM-make-windows-pretty-main-dizzi/opencode/plugins/voice"
+    }
+  ]
+}
