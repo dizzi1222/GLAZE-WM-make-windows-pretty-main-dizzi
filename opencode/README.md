@@ -62,10 +62,12 @@ Atajos del plugin:
 - `F5` (`/voice-ask`): dicta y envía la transcripción al chat.
 - `F6`: mute del micrófono durante Live.
 - `F7`: cuelga Live o cancela la grabación.
-- `F3` (`/voice-config`): configura `Ruta de respuestas` como Motor → Provider → Modelo → Variante, o `Transcripción STT` como Provider → Modelo. Las rutas son ChatGPT OAuth, AGY ACP y Codex app-server; Codex usa `codex app-server`, no `codex-acp`.
+- `F3` (`/voice-config`): **Transcripción STT** pide motor y modelo de transcripción, seguido de **Provider → Modelo → Variant** de respuesta. OpenCode muestra su catálogo de chat habilitado. El perfil nuevo usa GPT-5.6 Luna `low` de forma predeterminada. Los perfiles guardados se conservan. **Ruta de respuestas** permite elegir OpenCode, AGY ACP o Codex app-server.
 - `Ctrl+X`, luego `V`: abre la lista de variantes del modelo (`low`, `high`, `max`, etc. según el modelo). Cambia el nivel de razonamiento, no el volumen ni la sensibilidad del micrófono.
 
-Live (`F4`) detecta una frase, la transcribe localmente, la envía al motor seleccionado, reproduce la respuesta con SAPI y vuelve a escuchar. OAuth reutiliza la sesión OpenCode; AGY reutiliza una sesión ACP durante todo Live; Codex reutiliza un `thread` de app-server. F5 solo dicta y envía texto, sin TTS. Para respuestas habladas por ChatGPT, inicia sesión OAuth con `opencode auth login openai` y elige **Sign in with ChatGPT**; el plugin usa ese login para las respuestas Live, no para el reconocimiento del audio.
+Live (`F4`) detecta el final de una frase, la transcribe, envía el texto al motor elegido y reproduce la respuesta con SAPI al terminar el turno. La variante `low` reduce el esfuerzo del modelo de respuesta. Los motores STT de este plugin procesan segmentos completos. F5 dicta al chat usando su modelo actual. Para usar ChatGPT OAuth en la ruta OpenCode, inicia sesión con `opencode auth login openai` y elige **Sign in with ChatGPT**.
+
+La preferencia STT guardada tiene prioridad sobre `VOICE_PROVIDER`, `VOICE_MODEL` y `VOICE_LANGUAGE` del entorno. Si falta soporte para faster-whisper, actualiza el transcriptor y su helper juntos y comprueba el intérprete de Python. La validación en Windows no acredita soporte para CTranslate2 en Termux. Android requiere su propio paquete compatible y una prueba de captura y reproducción en el dispositivo.
 
 Los fallbacks no cambian de ruta silenciosamente. Para habilitar el fallback secundario de forma explícita define `OPENCODE_VOICE_ALLOW_FALLBACK=1`; de lo contrario Live informa el error del motor seleccionado y se detiene.
 
