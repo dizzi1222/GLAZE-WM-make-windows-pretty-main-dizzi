@@ -62,7 +62,7 @@ Atajos del plugin:
 - `F5` (`/voice-ask`): dicta y envía la transcripción al chat.
 - `F6`: mute del micrófono durante Live.
 - `F7`: cuelga Live o cancela la grabación.
-- `F3` (`/voice-config`): **Transcripción STT** pide motor y modelo de transcripción, seguido de **Provider → Modelo → Variant** de respuesta. OpenCode muestra su catálogo de chat habilitado. El perfil nuevo usa GPT-5.6 Luna `low` de forma predeterminada. Los perfiles guardados se conservan. **Ruta de respuestas** permite elegir OpenCode, AGY ACP o Codex app-server.
+- `F3` (`/voice-config`): **Transcripción STT** pide motor y modelo de transcripción, seguido de **Provider → Modelo → Variant** de respuesta. El selector muestra todos los providers y modelos de chat del catálogo de OpenCode e indica qué modelos están deshabilitados. El perfil nuevo usa GPT-5.6 Luna `low` de forma predeterminada. Los perfiles guardados se conservan. **Ruta de respuestas** permite elegir OpenCode, AGY ACP o Codex app-server.
 - `Ctrl+X`, luego `V`: abre la lista de variantes del modelo (`low`, `high`, `max`, etc. según el modelo). Cambia el nivel de razonamiento, no el volumen ni la sensibilidad del micrófono.
 
 Live (`F4`) detecta el final de una frase, la transcribe, envía el texto al motor elegido y reproduce la respuesta con SAPI al terminar el turno. La variante `low` reduce el esfuerzo del modelo de respuesta. Los motores STT de este plugin procesan segmentos completos. F5 dicta al chat usando su modelo actual. Para usar ChatGPT OAuth en la ruta OpenCode, inicia sesión con `opencode auth login openai` y elige **Sign in with ChatGPT**.
