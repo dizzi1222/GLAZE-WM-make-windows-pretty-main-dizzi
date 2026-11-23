@@ -25,7 +25,6 @@
         "type": "local",
         "command": [
           "figma-developer-mcp",
-          "--figma-api-key={env:FIGMA_API_KEY}",
           "--stdio"
         ]
       },
@@ -50,151 +49,99 @@
           "WS_HOST_UK",
           "WS_PORT_UK"
         ],
+        "disabled": true
+      },
+      "notion": {
+        "type": "remote",
+        "url": "https://mcp.notion.com/mcp",
         "disabled": false
       },
-      "webshare-es": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_ES",
-          "WS_PORT_ES"
-        ],
+      "canva": {
+        "type": "remote",
+        "url": "https://mcp.canva.com/mcp",
         "disabled": false
       },
-      "webshare-us": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US",
-          "WS_PORT_US"
-        ],
-        "disabled": true
+      "cloudflare": {
+        "type": "remote",
+        "url": "https://mcp.cloudflare.com/mcp",
+        "disabled": false
       },
-      "webshare-us-2": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_2",
-          "WS_PORT_US_2"
-        ],
-        "disabled": true
+      "atlassian": {
+        "type": "remote",
+        "url": "https://mcp.atlassian.com/v1/mcp",
+        "disabled": false
       },
-      "webshare-us-3": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_3",
-          "WS_PORT_US_3"
-        ],
-        "disabled": true
+      "vercel": {
+        "type": "remote",
+        "url": "https://mcp.vercel.com",
+        "disabled": false
       },
-      "webshare-pl": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_PL",
-          "WS_PORT_PL"
-        ],
-        "disabled": true
+      "webshare": {
+        "type": "remote",
+        "url": "https://mcp.webshare.io/",
+        "disabled": false
       },
-      "webshare-us-4": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_4",
-          "WS_PORT_US_4"
-        ],
-        "disabled": true
+      "todoist": {
+        "type": "remote",
+        "url": "https://ai.todoist.net/mcp",
+        "headers": {
+          "Authorization": "Bearer {env:TODOIST_TOKEN}"
+        },
+        "disabled": false
       },
-      "webshare-us-5": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_5",
-          "WS_PORT_US_5"
-        ],
-        "disabled": true
+      "gitlab": {
+        "type": "remote",
+        "url": "https://gitlab.com/api/v4/mcp",
+        "headers": {
+          "Authorization": "Bearer {env:GITLAB_TOKEN}"
+        },
+        "disabled": false
       },
-      "webshare-us-6": {
-        "type": "local",
-        "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_6",
-          "WS_PORT_US_6"
-        ],
-        "disabled": true
+      "postman": {
+        "type": "remote",
+        "url": "https://mcp.postman.com/minimal",
+        "headers": {
+          "Authorization": "Bearer {env:POSTMAN_API_KEY}"
+        },
+        "disabled": false
       },
-      "webshare-us-7": {
+      "prisma-postgres": {
+        "type": "remote",
+        "url": "https://mcp.prisma.io/mcp",
+        "headers": {
+          "Authorization": "Bearer {env:PRISMA_TOKEN}"
+        },
+        "disabled": false
+      },
+      "rentahuman": {
+        "type": "remote",
+        "url": "https://rentahuman.ai/api/mcp",
+        "headers": {
+          "x-api-key": "{env:RENTAHUMAN_API_KEY}"
+        },
+        "disabled": false
+      },
+      "microsoft-learn": {
+        "type": "remote",
+        "url": "https://learn.microsoft.com/api/mcp",
+        "disabled": false
+      },
+      "twilio-docs": {
+        "type": "remote",
+        "url": "https://mcp.twilio.com/docs",
+        "disabled": false
+      },
+      "swissdevjobs": {
         "type": "local",
         "command": [
-          "powershell",
-          "-NoProfile",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-WindowStyle",
-          "Hidden",
-          "-File",
-          "C:/Users/Administrator/.config/opencode/scripts/run-webshare-mcp.ps1",
-          "WS_HOST_US_7",
-          "WS_PORT_US_7"
+          "C:/Users/Administrator/.local/bin/swissdevjobs-mcp.exe"
         ],
-        "disabled": true
+        "environment": {
+          "SDJ_NAME": "Diego Samuel Hardi Santana",
+          "SDJ_EMAIL": "diegosamuel042@gmail.com",
+          "SDJ_CV": "C:/Users/Administrator/mi_gdrive/Mi unidad/[Clase]/- Curriculum copium [+Certificados]/cv.pdf"
+        },
+        "disabled": false
       }
     }
   },
@@ -242,9 +189,7 @@
       }
     },
     "anthropic": {
-      "options": {
-        "apiKey": "{env:ANTHROPIC_API_KEY}"
-      }
+      "options": {}
     },
     "openrouter": {
       "options": {

@@ -152,30 +152,28 @@ async function isEngramRunning(): Promise<boolean> {
 
 // ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
-function extractProjectName(directory: string): string {
-  // Try git remote origin URL
-  try {
-    const result = Bun.spawnSync(["git", "-C", directory, "remote", "get-url", "origin"])
-    if (result.exitCode === 0) {
-      const url = result.stdout?.toString().trim()
-      if (url) {
-        const name = url.replace(/\.git$/, "").split(/[/:]/).pop()
+async function extractProjectName(directory: string): Promise<string> {
+  // Lee .git/config sin lanzar procesos (git.exe abre ventana en Windows)
+  let dir = directory.replace(/[\\/]+$/, "")
+  for (let i = 0; i < 8; i++) {
+    try {
+      const text = await Bun.file(`${dir}/.git/config`).text()
+      const m = text.match(/url\s*=\s*(.+)/)
+      if (m) {
+        const name = m[1].trim().replace(/\.git$/, "").split(/[/:]/).pop()
         if (name) return name
       }
-    }
-  } catch {}
+      const base = dir.split(/[\\/]/).pop()
+      if (base) return base
+    } catch {}
 
-  // Fallback: git root directory name (works in worktrees)
-  try {
-    const result = Bun.spawnSync(["git", "-C", directory, "rev-parse", "--show-toplevel"])
-    if (result.exitCode === 0) {
-      const root = result.stdout?.toString().trim()
-      if (root) return root.split("/").pop() ?? "unknown"
-    }
-  } catch {}
+    const parent = dir.replace(/[\\/][^\\/]+$/, "")
+    if (!parent || parent === dir) break
+    dir = parent
+  }
 
   // Final fallback: cwd basename
-  return directory.split("/").pop() ?? "unknown"
+  return directory.split(/[\\/]/).pop() ?? "unknown"
 }
 
 function truncate(str: string, max: number): string {
@@ -191,6 +189,21 @@ function truncate(str: string, max: number): string {
 function stripPrivateTags(str: string): string {
   if (!str) return ""
   return str.replace(/<private>[\s\S]*?<\/private>/gi, "[REDACTED]").trim()
+}
+
+/**
+ * Lanza un proceso de consola sin abrir ventana en Windows.
+ */
+function spawnHidden(args: string[], cwd?: string): void {
+  // Spawn directo con CREATE_NO_WINDOW: `powershell -WindowStyle Hidden` igual
+  // crea la consola y la muestra un instante antes de ocultarla.
+  Bun.spawn(args, {
+    cwd,
+    stdout: "ignore",
+    stderr: "ignore",
+    stdin: "ignore",
+    windowsHide: true,
+  })
 }
 
 // ΓöÇΓöÇΓöÇ Plugin Export ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
@@ -229,7 +242,7 @@ export default {
   async setup(ctx: V2Context) {
     const directory = ctx.location.directory
     const oldProject = directory.split(/[\\/]/).pop() ?? "unknown"
-    const project = extractProjectName(directory)
+    const project = await extractProjectName(directory)
     const toolCounts = new Map<string, number>()
     const lastNudgeTime = new Map<string, number>()
     const knownSessions = new Set<string>()
@@ -246,11 +259,7 @@ export default {
 
     try {
       if (!(await isEngramRunning())) {
-        Bun.spawn([ENGRAM_BIN, "serve"], {
-          stdout: "ignore",
-          stderr: "ignore",
-          stdin: "ignore",
-        })
+        spawnHidden([ENGRAM_BIN, "serve"])
         await new Promise((resolve) => setTimeout(resolve, 500))
       }
     } catch {
@@ -267,12 +276,7 @@ export default {
     try {
       const manifestFile = `${directory}/.engram/manifest.json`
       if (await Bun.file(manifestFile).exists()) {
-        Bun.spawn([ENGRAM_BIN, "sync", "--import"], {
-          cwd: directory,
-          stdout: "ignore",
-          stderr: "ignore",
-          stdin: "ignore",
-        })
+        spawnHidden([ENGRAM_BIN, "sync", "--import"], directory)
       }
     } catch {
       // Missing manifest or binary is a no-op.
